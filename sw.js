@@ -1,34 +1,58 @@
 // Service Worker for THE BLOOM - PWA support
-const CACHE_NAME = 'bloom-v2';
-const ASSETS = [
+// Game code must not be pinned to an old cache: stale JS can load an older
+// level layout/objective system and make the game appear "broken" on another PC.
+const CACHE_NAME = 'bloom-v3';
+
+const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/css/style.css',
   '/favicon.svg',
   '/logo.svg',
-  '/js/01-core.js',
-  '/js/02-rendering.js',
-  '/js/03-level-engine.js',
-  '/js/04-entities.js',
-  '/js/05-game-state.js',
-  '/js/06-ui-flow.js',
-  '/js/07-levels.js',
-  '/js/08-main.js',
-  '/js/09-enhancements.js',
-  '/js/10-combat.js',
-  '/js/11-visuals.js',
-  '/js/12-mobile.js'
+  '/manifest.json'
 ];
+
+const GAME_PREFIX = '/js/';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(ASSETS))
+      .then((cache) => cache.addAll(STATIC_ASSETS))
       .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('fetch', (e) => {
+  const url = new URL(e.request.url);
+
+  // Never serve cached JavaScript for the game. Always ask the server first;
+  // fall back to the cache only when offline.
+  if (url.origin === self.location.origin && url.pathname.startsWith(GAME_PREFIX)) {
+    e.respondWith(
+      fetch(e.request, { cache: 'no-store' })
+        .then((response) => {
+          if (response && response.ok) return response;
+          throw new Error('Game asset request failed: ' + response.status);
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Network-first for navigation so deployed index.html is never pinned.
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request, { cache: 'no-store' })
+        .then((response) => {
+          if (response && response.ok) return response;
+          throw new Error('Navigation request failed: ' + response.status);
+        })
+        .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Cache-first only for stable static assets.
   e.respondWith(
     caches.match(e.request).then((response) => response || fetch(e.request))
   );
@@ -36,8 +60,12 @@ self.addEventListener('fetch', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(
-      keys.map((key) => key !== CACHE_NAME ? caches.delete(key) : null).filter(Boolean)
-    )).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
   );
 });
