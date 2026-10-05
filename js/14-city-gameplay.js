@@ -191,7 +191,7 @@ function expandBuild(i, make) {
   const orig = BUILD[i];
   BUILD[i] = function () {
     const L = orig.apply(this, arguments);
-    try { make(L); } catch (e) { warn('city' + i, e); try { L.finish(); } catch (_) {} }
+    try { make(L); } catch (e) { cityWarn('city' + i, e); try { L.finish(); } catch (_) {} }
     return L;
   };
 }
