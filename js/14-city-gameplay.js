@@ -173,6 +173,9 @@ function cityKit(L, cfg) {
   for (let i = 0; i < (cfg.blooms || 0); i++) L.decal({ t: 'bloom', x: R(ow + 4, L.w - 4), y: R(6, L.h - 6), r: R(2, 3) });
   // 7. rebuild collision / path-finding data, then populate
   L.finish();
+  // finish() rebuilds the larger collision grid; refresh both flow fields too.
+  if (L.player && L.fP) L.bfs(L.player.x, L.player.y, L.fP);
+  if (L.daughter && L.fD) L.bfs(L.daughter.x, L.daughter.y, L.fD);
   const pl = L.player, free = (x, y, r) => !L.hitSolid(x, y, r) && L.blk[(y | 0) * L.w + (x | 0)] === 0;
   let placed = 0, tries = 0; const f = cfg.foes;
   if (f) while (placed < f.n && tries < f.n * 40) {
@@ -316,6 +319,20 @@ function installCityGameplaySafety() {
         L.cityBrief = style === 'dead'
           ? 'QUARANTINE DISTRICT — BOMBARDMENT ZONE'
           : 'ABANDONED CITY DISTRICT';
+
+        // Improve the existing objective without replacing it. The original
+        // level objective remains authoritative; this adds context only while
+        // the player is actually exploring the expanded district.
+        const baseObjective = L.objText;
+        if (typeof baseObjective === 'function' && !L._bloomCityObjective) {
+          L._bloomCityObjective = true;
+          L.objText = () => {
+            const base = baseObjective();
+            if (L.over || !L.player) return base;
+            const outside = L.player.x >= originalW - 3 || L.player.y >= originalH - 3;
+            return outside ? base + '  —  ' + L.cityBrief : base;
+          };
+        }
       } catch (e) { cityWarn('mark', e); }
       return L;
     };
