@@ -1,6 +1,6 @@
 'use strict';
 /* ============================================================
-   THE BLOOM — mobile/touch layer (12), v3
+   THE BLOOM — mobile/touch layer (12), v4
    Auto-detected on coarse-pointer devices (phones/tablets):
    • touch-and-hold anywhere → walk toward your finger
      (hold far from David to sprint; a marker shows the target)
@@ -20,50 +20,76 @@
 
  const mk=(cls,txt)=>{const d=document.createElement('div');d.className=cls;if(txt)d.textContent=txt;return d;};
 
- /* ---------- hold anywhere: walk toward your finger ---------- */
- let moveId=null,aimId=null,lastTX=0,lastTY=0,lastTT=0,tapped=false;
+ /* ---------- single-touch movement + tap attack ---------- */
+ let moveId=null,lastTX=0,lastTY=0,lastTT=0,tapped=false;
  function clearKeys(){keys.KeyW=keys.KeyA=keys.KeyS=keys.KeyD=keys.ShiftLeft=false;}
  function worldAt(cx0,cy0){try{
   if(typeof s2w==='function')return s2w(cx0,cy0);
   const p=LV&&LV.player;
   if(p&&typeof isx==='function')return[p.x+(cx0-isx(p.x,p.y))*.08,p.y+(cy0-isy(p.x,p.y,0))*.08];
  }catch(e){}return null;}
- function aim(t){const w=worldAt(t.clientX,t.clientY),p=LV&&LV.player;
+ function aim(t){
+  const w=worldAt(t.clientX,t.clientY),p=LV&&LV.player;
   if(!w||!p)return;
-  const wx=Array.isArray(w)?w[0]:w.x, wy=Array.isArray(w)?w[1]:w.y;if(!Number.isFinite(wx)||!Number.isFinite(wy))return;const dx=wx-p.x,dy=wy-p.y,d=Math.hypot(dx,dy);
+  const wx=Array.isArray(w)?w[0]:w.x,wy=Array.isArray(w)?w[1]:w.y;
+  if(!Number.isFinite(wx)||!Number.isFinite(wy))return;
+  const dx=wx-p.x,dy=wy-p.y,d=Math.hypot(dx,dy);
   if(d<.5){clearKeys();return;}
   const c=dx/d,s=dy/d;
   keys.KeyD=c>.45;keys.KeyA=c<-.45;keys.KeyS=s>.45;keys.KeyW=s<-.45;
-  keys.ShiftLeft=d>5.5;}
- /* small pulsing marker at the live move-target so you can see where you steer */
+  keys.ShiftLeft=d>5.5;
+ }
  function drawMarker(){
   if(moveId===null||state!=='play')return;
-  try{setScreen();const r=cv.getBoundingClientRect();
+  try{
+   setScreen();const r=cv.getBoundingClientRect();
    const px=(lastTX-r.left)*(cv.width/r.width),py=(lastTY-r.top)*(cv.height/r.height);
    cx.save();cx.globalAlpha=.7;cx.strokeStyle='#4dffb0';cx.lineWidth=2.5;
    cx.beginPath();cx.arc(px,py,15+3*Math.sin(performance.now()/160),0,6.2832);cx.stroke();
    cx.beginPath();cx.moveTo(px-7,py);cx.lineTo(px+7,py);cx.moveTo(px,py-7);cx.lineTo(px,py+7);cx.stroke();
-   cx.restore();cx.globalAlpha=1;}catch(e){}}
- try{const _mm=minimap;minimap=function(lv){const r=_mm.apply(this,arguments);try{drawMarker();}catch(e){}return r;};}catch(e){}
+   cx.restore();cx.globalAlpha=1;
+  }catch(e){}
+ }
+ try{
+  const _mm=minimap;
+  minimap=function(lv){const out=_mm.apply(this,arguments);try{drawMarker();}catch(e){}return out;};
+ }catch(e){}
 
- cv.addEventListener('touchstart',e=>{e.preventDefault();
+ /* Remove any legacy virtual joystick if an older cached UI injected one. */
+ try{
+  document.querySelectorAll('.joystick,.joystick-base,.joystick-stick,#joystick,[id*="joystick" i],[class*="joystick" i]').forEach(el=>el.remove());
+ }catch(e){}
+
+ cv.addEventListener('touchstart',e=>{
+  e.preventDefault();
   if(state!=='play')return;
+  const t=e.changedTouches[0];
+  if(!t)return;
+  moveId=t.identifier;lastTX=t.clientX;lastTY=t.clientY;lastTT=performance.now();tapped=true;
+  TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.on=true;TOUCH.click=false;
+  aim(t);
+ },{passive:false});
+
+ cv.addEventListener('touchmove',e=>{
+  e.preventDefault();
   for(const t of e.changedTouches){
-   if(moveId===null&&t.identifier!==aimId){moveId=t.identifier;lastTX=t.clientX;lastTY=t.clientY;lastTT=performance.now();tapped=true;aim(t);}
-   else if(t.identifier!==moveId){aimId=t.identifier;TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.on=true;TOUCH.click=true;}
+   if(t.identifier!==moveId)continue;
+   if(Math.hypot(t.clientX-lastTX,t.clientY-lastTY)>12)tapped=false;
+   lastTX=t.clientX;lastTY=t.clientY;
+   TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.on=true;
+   aim(t);
   }
  },{passive:false});
- cv.addEventListener('touchmove',e=>{e.preventDefault();
-  for(const t of e.changedTouches)if(t.identifier===moveId){
-   if(Math.hypot(t.clientX-lastTX,t.clientY-lastTY)>14)tapped=false;
-   lastTX=t.clientX;lastTY=t.clientY;aim(t);}
-  else if(t.identifier===aimId){TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.on=true;}
- },{passive:false});
- function endTouch(e){for(const t of e.changedTouches)if(t.identifier===moveId){
-  /* quick tap = single attack at that spot (combat layer retries it if mid-swing) */
-  if(tapped&&performance.now()-lastTT<260){TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.click=true;}
-  moveId=null;clearKeys();}
-  else if(t.identifier===aimId){aimId=null;TOUCH.on=false;}
+
+ function endTouch(e){
+  for(const t of e.changedTouches){
+   if(t.identifier!==moveId)continue;
+   const quick=tapped&&performance.now()-lastTT<280;
+   TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.on=false;
+   clearKeys();moveId=null;
+   /* short tap = attack at the tapped location; hold = movement only */
+   if(quick)TOUCH.click=true;
+  }
  }
  cv.addEventListener('touchend',endTouch,{passive:false});
  cv.addEventListener('touchcancel',endTouch,{passive:false});
