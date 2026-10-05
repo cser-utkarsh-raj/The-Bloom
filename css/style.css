@@ -129,28 +129,94 @@ body.mobile #prompt{bottom:196px}
 body.mobile #sub{bottom:196px;font-size:14px}
 body.mobile #banner{font-size:30px;letter-spacing:3px}
 body.mobile #hl{gap:5px}
-.m-stick{position:fixed;left:18px;bottom:22px;width:120px;height:120px;border-radius:50%;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.14);z-index:20;touch-action:none}
-.m-knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;back
-ground:rgba(77,255,160,.22);border:1px solid rgba(77,255,160,.55);pointer-events:none}
-.m-btn{position:fixed;z-index:20;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:10px;letter-spacing:1px;color:#cfe9da;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(2px);touch-action:none;user-select:none;-webkit-user-select:none}
-.m-btn:active{background:rgba(77,255,160,.25);border-color:var(--acc)}
-.m-b-atk{right:18px;bottom:84px;width:80px;height:80px;font-size:13px;border-color:rgba(77,255,160,.6)}
-.m-b-dodge{right:110px;bottom:26px;width:60px;height:60px}
-.m-b-parry{right:112px;bottom:112px;width:60px;height:60px;border-color:rgba(106,216,255,.5)}
-.m-b-heavy{right:110px;bottom:84px;width:62px;height:62px;font-size:9px;border-color:rgba(255,170,60,.55);color:#ffd9a8}
-.m-b-med{right:26px;bottom:184px;width:54px;height:54px}
-.m-b-carry{right:118px;bottom:190px;width:54px;height:54px}
-.m-pause{right:14px;top:10px;width:38px;height:38px;border-radius:4px;font-size:14px}
-.m-rotate{display:none;position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:21;font-size:10px;letter-spacing:2px;color:#8d918c;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12);padding:5px 12px;pointer-events:none}
+
+/* ---------- BGMI-style mobile movement pad ---------- */
+.m-joy{
+ position:fixed;
+ left:18px;
+ bottom:20px;
+ width:132px;
+ height:132px;
+ z-index:30;
+ border-radius:50%;
+ touch-action:none;
+ user-select:none;
+ -webkit-user-select:none;
+ -webkit-tap-highlight-color:transparent;
+}
+.m-joy-ring{
+ position:absolute;
+ left:50%;
+ top:50%;
+ width:112px;
+ height:112px;
+ margin:-56px 0 0 -56px;
+ border-radius:50%;
+ background:radial-gradient(circle,rgba(255,255,255,.07) 0 38%,rgba(0,0,0,.38) 39% 72%,rgba(0,0,0,.58) 73% 100%);
+ border:2px solid rgba(255,255,255,.20);
+ box-shadow:inset 0 0 0 7px rgba(0,0,0,.20),0 5px 18px rgba(0,0,0,.35);
+ pointer-events:none;
+}
+.m-joy-ring:before{
+ content:"";
+ position:absolute;
+ inset:10px;
+ border-radius:50%;
+ border:1px solid rgba(255,255,255,.10);
+}
+.m-joy-dot{
+ position:absolute;
+ left:50%;
+ top:50%;
+ width:7px;
+ height:7px;
+ margin:-3.5px 0 0 -3.5px;
+ border-radius:50%;
+ background:rgba(207,233,218,.38);
+ box-shadow:0 0 8px rgba(77,255,160,.18);
+}
+.m-joy-knob{
+ position:absolute;
+ left:50%;
+ top:50%;
+ width:54px;
+ height:54px;
+ margin:-27px 0 0 -27px;
+ border-radius:50%;
+ background:radial-gradient(circle at 38% 34%,rgba(120,255,190,.32),rgba(20,40,32,.82) 62%,rgba(0,0,0,.88) 100%);
+ border:2px solid rgba(210,255,232,.52);
+ box-shadow:0 4px 12px rgba(0,0,0,.55),inset 0 0 12px rgba(77,255,160,.12);
+ pointer-events:none;
+ transition:transform .035s linear;
+}
+.m-joy:active .m-joy-knob{border-color:rgba(77,255,160,.85)}
+.m-btn{display:none!important}
+.m-b-atk,.m-b-dodge,.m-b-parry,.m-b-heavy,.m-b-med,.m-b-carry,.m-b-map,.m-pause{display:none!important}
+
+.m-rotate{
+ display:none;
+ position:fixed;
+ left:50%;
+ top:12px;
+ transform:translateX(-50%);
+ z-index:31;
+ font-size:10px;
+ letter-spacing:2px;
+ color:#8d918c;
+ background:rgba(0,0,0,.55);
+ border:1px solid rgba(255,255,255,.12);
+ padding:5px 12px;
+ pointer-events:none;
+}
 @media(orientation:portrait){body.mobile .m-rotate{display:block}}
-@media(max-height:420px){.m-stick{width:100px;height:100px;bottom:12px}.m-b-atk{width:68px;height:68px;bottom:70px}.m-b-dodge,.m-b-parry{width:52px;height:52px}.m-b-heavy{width:50px;height:50px;right:96px;bottom:66px}.m-b-med,.m-b-carry{width:46px;height:46px;bottom:160px}.m-b-parry{bottom:100px;right:100px}.m-b-carry{right:104px;bottom:160px}}
+@media(max-height:420px){
+ .m-joy{left:12px;bottom:12px;width:112px;height:112px}
+ .m-joy-ring{width:94px;height:94px;margin:-47px 0 0 -47px}
+ .m-joy-knob{width:46px;height:46px;margin:-23px 0 0 -23px}
+}
 body.mobile .menu-shell{padding-top:2vh}
 body.mobile .ttl{font-size:26px!important}
 body.mobile .intro-t{font-size:22px}
 body.mobile .txt{font-size:13px;line-height:1.6}
 body.mobile .btn{width:min(280px,80vw);padding:10px 0;font-size:12px}
 body.mobile .shop{flex-wrap:wrap}
-
-/* ---------- touch controls v2 ---------- */
-.m-b-map{left:14px;bottom:152px;width:52px;height:52px;border-radius:8px;font-size:10px}
-body.mobile .m-stick,body.mobile .m-knob,body.mobile .m-b-atk{display:none}
