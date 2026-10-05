@@ -1,7 +1,7 @@
 // Service Worker for THE BLOOM - PWA support
 // Game code must not be pinned to an old cache: stale JS can load an older
 // level layout/objective system and make the game appear "broken" on another PC.
-const CACHE_NAME = 'bloom-v3';
+const CACHE_NAME = 'bloom-v4';
 
 const STATIC_ASSETS = [
   '/',
