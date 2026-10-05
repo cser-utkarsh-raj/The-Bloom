@@ -1,128 +1,204 @@
 'use strict';
 /* ============================================================
-   THE BLOOM — mobile/touch layer (12), v4
-   Auto-detected on coarse-pointer devices (phones/tablets):
-   • touch-and-hold anywhere → walk toward your finger
-     (hold far from David to sprint; a marker shows the target)
-   • quick tap → one attack toward that spot
-   • hold + second finger → continuous attacks toward that spot
-   • buttons: HEAVY / DODGE / PARRY / MED / NANCY / MAP / PAUSE
+   THE BLOOM — mobile/touch layer (12), v5
+   Phone controls:
+   • BGMI-style fixed circular movement pad, bottom-left
+   • Push the pad in any direction to walk
+   • Push near the outer ring to sprint
+   • Release the pad to stop
+   • Tap anywhere outside the pad to attack that spot
+   • No mobile action buttons / no second-finger control
    Desktop keyboard/mouse are completely untouched.
-   ============================================================ */(function(){
+   ============================================================ */
+(function(){
  if(typeof keys==='undefined'||typeof cv==='undefined'||typeof TOUCH==='undefined')return;
  const isTouch=('ontouchstart' in window||navigator.maxTouchPoints>0)&&window.matchMedia&&matchMedia('(pointer: coarse)').matches;
  if(!isTouch)return;
  document.body.classList.add('mobile');
- /* lighter default gfx on phones that never saved settings */
+
  try{if(!localStorage.getItem('bloomS2')){S.gfx='medium';}}catch(e){}
- /* unlock WebAudio on first touch (iOS) */
  addEventListener('touchstart',()=>{try{audioInit();}catch(e){}},{passive:true});
 
- const mk=(cls,txt)=>{const d=document.createElement('div');d.className=cls;if(txt)d.textContent=txt;return d;};
+ const mk=(cls,txt)=>{
+  const d=document.createElement('div');
+  d.className=cls;
+  if(txt)d.textContent=txt;
+  return d;
+ };
 
- /* ---------- single-touch movement + tap attack ---------- */
- let moveId=null,lastTX=0,lastTY=0,lastTT=0,tapped=false;
- function clearKeys(){keys.KeyW=keys.KeyA=keys.KeyS=keys.KeyD=keys.ShiftLeft=false;}
- function worldAt(cx0,cy0){try{
-  if(typeof s2w==='function')return s2w(cx0,cy0);
-  const p=LV&&LV.player;
-  if(p&&typeof isx==='function')return[p.x+(cx0-isx(p.x,p.y))*.08,p.y+(cy0-isy(p.x,p.y,0))*.08];
- }catch(e){}return null;}
- function aim(t){
-  const w=worldAt(t.clientX,t.clientY),p=LV&&LV.player;
-  if(!w||!p)return;
-  const wx=Array.isArray(w)?w[0]:w.x,wy=Array.isArray(w)?w[1]:w.y;
-  if(!Number.isFinite(wx)||!Number.isFinite(wy))return;
-  const dx=wx-p.x,dy=wy-p.y,d=Math.hypot(dx,dy);
-  if(d<.5){clearKeys();return;}
-  const c=dx/d,s=dy/d;
-  keys.KeyD=c>.45;keys.KeyA=c<-.45;keys.KeyS=s>.45;keys.KeyW=s<-.45;
-  keys.ShiftLeft=d>5.5;
+ /* Remove every legacy mobile button/joystick from older versions. */
+ try{
+  document.querySelectorAll('.m-btn,.m-stick,.m-knob,.joystick,.joystick-base,.joystick-stick,#joystick,[id*="joystick" i],[class*="joystick" i]').forEach(el=>el.remove());
+ }catch(e){}
+
+ /* ---------- BGMI-style movement pad ---------- */
+ const joy=mk('m-joy');
+ const ring=mk('m-joy-ring');
+ const knob=mk('m-joy-knob');
+ const dot=mk('m-joy-dot');
+ ring.appendChild(dot);
+ joy.appendChild(ring);
+ joy.appendChild(knob);
+ document.body.appendChild(joy);
+
+ let joyId=null;
+ let joyX=0,joyY=0;
+ const JOY_R=46;
+
+ function clearMove(){
+  keys.KeyW=keys.KeyA=keys.KeyS=keys.KeyD=keys.ShiftLeft=false;
  }
- function drawMarker(){
-  if(moveId===null||state!=='play')return;
+
+ function setMoveFromTouch(t){
+  const r=joy.getBoundingClientRect();
+  const cx=r.left+r.width/2;
+  const cy=r.top+r.height/2;
+  let dx=t.clientX-cx;
+  let dy=t.clientY-cy;
+  const len=Math.hypot(dx,dy);
+  const max=JOY_R;
+  const used=Math.min(len,max);
+  if(len>0.001){
+   dx=dx/len*used;
+   dy=dy/len*used;
+  }else{
+   dx=dy=0;
+  }
+
+  joyX=dx;
+  joyY=dy;
+  knob.style.transform='translate('+dx.toFixed(1)+'px,'+dy.toFixed(1)+'px)';
+
+  const nx=dx/max;
+  const ny=dy/max;
+  const dead=.16;
+
+  keys.KeyD=nx>dead;
+  keys.KeyA=nx<-dead;
+  keys.KeyS=ny>dead;
+  keys.KeyW=ny<-dead;
+  /* BGMI-like sprint: push the thumb toward the outer edge. */
+  keys.ShiftLeft=(Math.hypot(nx,ny)>=.78);
+
+  /* Keep David's aim aligned with the current touch point. */
   try{
-   setScreen();const r=cv.getBoundingClientRect();
-   const px=(lastTX-r.left)*(cv.width/r.width),py=(lastTY-r.top)*(cv.height/r.height);
-   cx.save();cx.globalAlpha=.7;cx.strokeStyle='#4dffb0';cx.lineWidth=2.5;
-   cx.beginPath();cx.arc(px,py,15+3*Math.sin(performance.now()/160),0,6.2832);cx.stroke();
-   cx.beginPath();cx.moveTo(px-7,py);cx.lineTo(px+7,py);cx.moveTo(px,py-7);cx.lineTo(px,py+7);cx.stroke();
-   cx.restore();cx.globalAlpha=1;
+   TOUCH.x=t.clientX;
+   TOUCH.y=t.clientY;
   }catch(e){}
  }
- try{
-  const _mm=minimap;
-  minimap=function(lv){const out=_mm.apply(this,arguments);try{drawMarker();}catch(e){}return out;};
- }catch(e){}
 
- /* Remove any legacy virtual joystick if an older cached UI injected one. */
- try{
-  document.querySelectorAll('.joystick,.joystick-base,.joystick-stick,#joystick,[id*="joystick" i],[class*="joystick" i]').forEach(el=>el.remove());
- }catch(e){}
+ function releaseJoy(){
+  joyId=null;
+  joyX=joyY=0;
+  knob.style.transform='translate(0,0)';
+  clearMove();
+ }
+
+ joy.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  if(state!=='play')return;
+  const t=e.changedTouches[0];
+  if(!t)return;
+  joyId=t.identifier;
+  setMoveFromTouch(t);
+ },{passive:false});
+
+ joy.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  if(joyId===null)return;
+  for(const t of e.changedTouches){
+   if(t.identifier===joyId){
+    setMoveFromTouch(t);
+    break;
+   }
+  }
+ },{passive:false});
+
+ function endJoy(e){
+  e.preventDefault();
+  e.stopPropagation();
+  if(joyId===null)return;
+  for(const t of e.changedTouches){
+   if(t.identifier===joyId){
+    releaseJoy();
+    break;
+   }
+  }
+ }
+ joy.addEventListener('touchend',endJoy,{passive:false});
+ joy.addEventListener('touchcancel',endJoy,{passive:false});
+
+ /* ---------- tap anywhere else = attack ---------- */
+ let attackId=null;
+ let attackX=0,attackY=0,attackT=0,attackMoved=false;
+
+ function setAttackTouch(t){
+  attackX=t.clientX;
+  attackY=t.clientY;
+  attackT=performance.now();
+  attackMoved=false;
+  TOUCH.x=attackX;
+  TOUCH.y=attackY;
+  TOUCH.on=true;
+  TOUCH.click=false;
+ }
 
  cv.addEventListener('touchstart',e=>{
   e.preventDefault();
   if(state!=='play')return;
-  const t=e.changedTouches[0];
-  if(!t)return;
-  moveId=t.identifier;lastTX=t.clientX;lastTY=t.clientY;lastTT=performance.now();tapped=true;
-  TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.on=true;TOUCH.click=false;
-  aim(t);
+
+  for(const t of e.changedTouches){
+   if(attackId!==null)continue;
+   attackId=t.identifier;
+   setAttackTouch(t);
+   break;
+  }
  },{passive:false});
 
  cv.addEventListener('touchmove',e=>{
   e.preventDefault();
+  if(attackId===null)return;
+
   for(const t of e.changedTouches){
-   if(t.identifier!==moveId)continue;
-   if(Math.hypot(t.clientX-lastTX,t.clientY-lastTY)>12)tapped=false;
-   lastTX=t.clientX;lastTY=t.clientY;
-   TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.on=true;
-   aim(t);
+   if(t.identifier!==attackId)continue;
+   if(Math.hypot(t.clientX-attackX,t.clientY-attackY)>12)attackMoved=true;
+   attackX=t.clientX;
+   attackY=t.clientY;
+   TOUCH.x=attackX;
+   TOUCH.y=attackY;
+   break;
   }
  },{passive:false});
 
- function endTouch(e){
+ function endAttack(e){
+  e.preventDefault();
+  if(attackId===null)return;
+
   for(const t of e.changedTouches){
-   if(t.identifier!==moveId)continue;
-   const quick=tapped&&performance.now()-lastTT<280;
-   TOUCH.x=t.clientX;TOUCH.y=t.clientY;TOUCH.on=false;
-   clearKeys();moveId=null;
-   /* short tap = attack at the tapped location; hold = movement only */
+   if(t.identifier!==attackId)continue;
+   const quick=!attackMoved&&performance.now()-attackT<300;
+   TOUCH.x=t.clientX;
+   TOUCH.y=t.clientY;
+   TOUCH.on=false;
+   attackId=null;
    if(quick)TOUCH.click=true;
+   break;
   }
  }
- cv.addEventListener('touchend',endTouch,{passive:false});
- cv.addEventListener('touchcancel',endTouch,{passive:false});
-
- /* ---------- action buttons ---------- */
- function tapBtn(cls,label,fn){
-  const b=mk('m-btn '+cls,label);document.body.appendChild(b);
-  b.addEventListener('touchstart',e=>{e.preventDefault();try{fn();}catch(err){}},{passive:false});
-  return b;
- }
- /* HEAVY aims at the last touch point (or forward if you never touched) */
- tapBtn('m-b-heavy','HEAVY',()=>{const p=LV&&LV.player;
-  if(p){if(!TOUCH.on){TOUCH.x=p.aimX||mouse.x;TOUCH.y=p.aimY||mouse.y;}TOUCH.heavy=true;}});
- tapBtn('m-b-dodge','DODGE',()=>{hit.KeyF=true;});
- tapBtn('m-b-parry','PARRY',()=>{hit.KeyR=true;});
- tapBtn('m-b-med','MED',()=>{hit.KeyQ=true;});
- tapBtn('m-b-carry','NANCY',()=>{hit.KeyE=true;});
- /* pause */
- const pb=mk('m-btn m-pause','II');document.body.appendChild(pb);
- pb.addEventListener('touchstart',e=>{e.preventDefault();try{if(state==='play')showPause();else if(state==='pause')resume();}catch(err){}},{passive:false});
- /* map */
- const mb=mk('m-btn m-b-map','MAP');document.body.appendChild(mb);
- mb.addEventListener('touchstart',e=>{e.preventDefault();try{if(state==='play')mapBig=!mapBig;}catch(err){}},{passive:false});
+ cv.addEventListener('touchend',endAttack,{passive:false});
+ cv.addEventListener('touchcancel',endAttack,{passive:false});
 
  /* ---------- touch-friendly HOW TO PLAY ---------- */
  try{
- showControls=function(){showOv(`<div class="ttl" style="font-size:34px">HOW TO PLAY</div><div class="sub">PROTECT NANCY · SURVIVE THE BLOOM</div>
-  <div class="kv"><b>TOUCH &amp; HOLD</b><span>Walk toward your finger. Hold far from David to sprint</span><b>QUICK TAP</b><span>Attack toward that spot</span><b>SECOND FINGER</b><span>Keep attacking where you tap while moving</span><b>HEAVY</b><span>Slow, powerful swing aimed at your last touch</span><b>DODGE</b><span>Dodge roll (brief invulnerability)</span><b>PARRY</b><span>Time it against an incoming swing</span><b>MED</b><span>Medkit — heals you, or Nancy if she\\'s hurt and close</span><b>NANCY</b><span>Carry / put down Nancy (she is safe, but you cannot attack)</span><b>MAP</b><span>Open / close the big map</span><b>II</b><span>Pause</span></div>
+  showControls=function(){showOv(`<div class="ttl" style="font-size:34px">HOW TO PLAY</div><div class="sub">PROTECT NANCY · SURVIVE THE BLOOM</div>
+  <div class="kv"><b>MOVE PAD</b><span>Drag the circular pad to walk in any direction</span><b>SPRINT</b><span>Push the pad toward the outer edge to run</span><b>TAP</b><span>Tap anywhere outside the pad to attack that spot</span><b>RELEASE</b><span>Let go of the pad to stop moving</span></div>
   <div class="txt" style="font-size:14px">Enemies notice noise and movement. Stand still to be harder to spot. Bloated infected explode when killed — back away. Glowing bloom patches raise infection; antidotes lower it. If it gets too high, the ending changes.</div>
   <div class="txt" style="font-size:13px;color:#7dffb0">Halo rings show who is who: <b style="color:#3aff70">green</b> healthy · <b style="color:#ffd34d">yellow</b>/<b style="color:#ff8a3a">orange</b> rising infection · <b style="color:#ff4040">red</b> infected · <b style="color:#c040ff">violet</b> Maya.</div>
   <div class="row"><button class="btn" onclick="showMenu()">← BACK</button></div>`,'menu');};
  }catch(e){}
 
- /* ---------- portrait rotate hint ---------- */
- const rh=mk('m-rotate','⟳ ROTATE FOR BEST EXPERIENCE');document.body.appendChild(rh);
+ const rh=mk('m-rotate','⟳ ROTATE FOR BEST EXPERIENCE');
+ document.body.appendChild(rh);
 })();
