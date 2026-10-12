@@ -1,0 +1,51 @@
+name: THE BLOOM CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: the-bloom-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    name: JavaScript syntax and required assets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JavaScript syntax
+        run: |
+          set -e
+          for file in js/*.js; do
+            node --check "$file"
+          done
+      - name: Check required game assets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          required = [
+              "index.html",
+              "favicon.svg",
+              "css/style.css",
+              "js/01-core.js",
+              "js/08-main.js",
+          ]
+          missing = [path for path in required if not Path(path).is_file()]
+          if missing:
+              raise SystemExit("Missing required game files: " + ", ".join(missing))
+          html = Path("index.html").read_text(encoding="utf-8")
+          if "js/08-main.js" not in html:
+              raise SystemExit("index.html does not load the game bootstrap script")
+          print("Required game files are present.")
+          PY
