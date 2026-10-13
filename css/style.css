@@ -522,3 +522,10 @@ body.mobile .menu-tagline{font-size:11px;margin:-16px 0 18px}
 .cfg-opt.active{border-color:var(--acc);color:#fff;background:rgba(77,255,160,.16);box-shadow:0 0 10px rgba(77,255,160,.25);font-weight:bold}
 body.mobile .cfg-tab{padding:6px 10px;font-size:9px}
 body.mobile .cfg-row{padding:8px 10px}
+
+
+/* First-paint shield: prevents stale/unfinished canvas content flashing during boot. */
+#boot-shield{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#03070a;opacity:1;visibility:visible;transition:opacity .18s ease,visibility .18s ease;pointer-events:all}
+#boot-shield img{display:block;width:min(420px,78vw);max-height:34vh;object-fit:contain;image-rendering:pixelated}
+#boot-shield span{font:10px 'Share Tech Mono','Courier New',monospace;letter-spacing:4px;color:#b9a05b;text-align:center}
+#boot-shield.boot-ready{opacity:0;visibility:hidden;pointer-events:none}
