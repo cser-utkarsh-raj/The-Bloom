@@ -23,9 +23,18 @@ function getSceneImg(type) {
   const src = SCENE_SRCS[type] || SCENE_SRCS.menu;
   if (!SCENE_IMGS[src]) {
     const img = new Image();
-    img.src = src;
     img.loaded = false;
+    img._bloomAssetFallbackTried = false;
     img.onload = () => { img.loaded = true; };
+    img.onerror = () => {
+      // Vite serves public/assets/* as /assets/*; direct-root hosting keeps
+      // the files under /public/assets/*. Retry the alternate valid location.
+      if (!img._bloomAssetFallbackTried && src.startsWith('assets/')) {
+        img._bloomAssetFallbackTried = true;
+        img.src = 'public/' + src;
+      }
+    };
+    img.src = src;
     SCENE_IMGS[src] = img;
   }
   return SCENE_IMGS[src];
@@ -960,7 +969,7 @@ function showChapters(){const n=['HOME DEFENSE','THE BLOOM-WIFE','THE ROAD','SCH
   const diffKey=(typeof rawB==='object'&&rawB!==null&&rawB.diff)?rawB.diff:((i<unlocked||best)?S.difficulty:null);
   return `<div class="chapter-card ${isUnlocked?'':'chapter-locked'}" ${isUnlocked?`onclick="chapter(${i})" role="button" tabindex="0"`:''}>
    <div class="chapter-card-inner">
-    <div class="chapter-thumb" style="background-image:url('assets/art/chapter${i+1}.jpg');">
+    <div class="chapter-thumb" style="background-image:url('assets/art/chapter${i+1}.jpg'),url('public/assets/art/chapter${i+1}.jpg');background-size:cover,cover;background-position:center,center;">
      ${!isUnlocked?'<div class="chapter-thumb-lock">&#128274;</div>':''}
     </div>
     <div class="chapter-info">
