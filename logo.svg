@@ -1,109 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 150" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 160" role="img" aria-labelledby="title desc">
+  <title id="title">THE BLOOM</title><desc id="desc">A pixel-art sunflower with dark fungal details.</desc>
   <defs>
-    <!-- Deep Ambient Glow Filter -->
-    <filter id="bloom-glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="6" result="blur1" />
-      <feGaussianBlur stdDeviation="15" result="blur2" />
-      <feMerge>
-        <feMergeNode in="blur2" />
-        <feMergeNode in="blur1" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
-    </filter>
-
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.95" />
-    </filter>
-
-    <!-- Gradients -->
-    <linearGradient id="textGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="45%" stop-color="#f5faf7" />
-      <stop offset="80%" stop-color="#d4e4db" />
-      <stop offset="100%" stop-color="#9eb6a7" />
-    </linearGradient>
-
-    <linearGradient id="petalTop" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#7affb0" />
-      <stop offset="45%" stop-color="#3aff8c" />
-      <stop offset="85%" stop-color="#158046" />
-      <stop offset="100%" stop-color="#052e16" />
-    </linearGradient>
-
-    <linearGradient id="petalSide" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#d8b4fe" />
-      <stop offset="50%" stop-color="#a855f7" />
-      <stop offset="100%" stop-color="#14532d" />
-    </linearGradient>
-
-    <radialGradient id="aura" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#4dffa0" stop-opacity="0.5" />
-      <stop offset="45%" stop-color="#9333ea" stop-opacity="0.25" />
-      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
-    </radialGradient>
+    <linearGradient id="gold" x2="0" y2="1"><stop stop-color="#ffe58a"/><stop offset="1" stop-color="#d58b25"/></linearGradient>
+    <linearGradient id="leaf" x2="0" y2="1"><stop stop-color="#8be28a"/><stop offset="1" stop-color="#286744"/></linearGradient>
   </defs>
-
-  <!-- Dark Backplate Shadow for maximum legibility on any canvas backdrop -->
-  <ellipse cx="260" cy="78" rx="250" ry="60" fill="#020403" opacity="0.75" filter="url(#bloom-glow)" />
-  <circle cx="260" cy="44" r="70" fill="url(#aura)" filter="url(#bloom-glow)" />
-
-  <!-- Biohazard Spore Flower Crest -->
-  <g transform="translate(260, 36)" filter="url(#bloom-glow)">
-    <!-- Root tendrils -->
-    <path d="M 0,16 Q -35,8 -62,-10 Q -80,-24 -98,-16 Q -82,-36 -48,-30 Q -24,-24 0,-6" fill="none" stroke="#22c55e" stroke-width="2.4" opacity="0.9" />
-    <path d="M 0,16 Q 35,8 62,-10 Q 80,-24 98,-16 Q 82,-36 48,-30 Q 24,-24 0,-6" fill="none" stroke="#22c55e" stroke-width="2.4" opacity="0.9" />
-    <path d="M 0,14 Q -25,-2 -46,-8 Q -68,-14 -78,-4" fill="none" stroke="#c084fc" stroke-width="1.8" opacity="0.85" />
-    <path d="M 0,14 Q 25,-2 46,-8 Q 68,-14 78,-4" fill="none" stroke="#c084fc" stroke-width="1.8" opacity="0.85" />
-
-    <!-- Blooming Floral Nodes -->
-    <!-- Top Petal -->
-    <path d="M 0,-34 C -12,-22 -14,-7 0,7 C 14,-7 12,-22 0,-34 Z" fill="url(#petalTop)" stroke="#bbf7d0" stroke-width="1" />
-    
-    <!-- Left & Right Petals -->
-    <path d="M -8,-5 C -28,-22 -46,-13 -42,7 C -38,22 -18,15 -3,4 Z" fill="url(#petalSide)" stroke="#e9d5ff" stroke-width="0.8" />
-    <path d="M 8,-5 C 28,-22 46,-13 42,7 C 38,22 18,15 3,4 Z" fill="url(#petalSide)" stroke="#e9d5ff" stroke-width="0.8" />
-
-    <!-- Luminous Central Core Bulb -->
-    <ellipse cx="0" cy="3" rx="8" ry="11" fill="#ffffff" />
-    <ellipse cx="0" cy="3" rx="5" ry="8" fill="#4dffa0" />
-    <circle cx="0" cy="1" r="2.8" fill="#ffffff" />
-
-    <!-- Drifting spore sparks -->
-    <circle cx="-62" cy="-24" r="2.4" fill="#4dffa0" />
-    <circle cx="58" cy="-26" r="2.4" fill="#c084fc" />
-    <circle cx="-35" cy="-36" r="1.8" fill="#ffffff" />
-    <circle cx="38" cy="-38" r="2" fill="#4dffa0" />
-    <circle cx="-82" cy="-6" r="1.8" fill="#c084fc" />
-    <circle cx="78" cy="-4" r="2.2" fill="#4dffa0" />
+  <g shape-rendering="crispEdges" transform="translate(18 9)">
+    <rect x="47" y="0" width="18" height="18" fill="#e5a83c"/>
+    <rect x="29" y="9" width="18" height="18" fill="#f7c64e"/><rect x="65" y="9" width="18" height="18" fill="#f7c64e"/>
+    <rect x="11" y="27" width="18" height="18" fill="#d58b25"/><rect x="29" y="27" width="18" height="18" fill="#ffe58a"/><rect x="47" y="18" width="18" height="18" fill="#ffe58a"/><rect x="65" y="27" width="18" height="18" fill="#ffe58a"/><rect x="83" y="27" width="18" height="18" fill="#d58b25"/>
+    <rect x="2" y="45" width="18" height="18" fill="#e6a335"/><rect x="20" y="45" width="18" height="18" fill="#f7c64e"/><rect x="38" y="36" width="18" height="18" fill="#d58b25"/><rect x="56" y="36" width="18" height="18" fill="#d58b25"/><rect x="74" y="45" width="18" height="18" fill="#f7c64e"/><rect x="92" y="45" width="18" height="18" fill="#e6a335"/>
+    <rect x="11" y="63" width="18" height="18" fill="#d58b25"/><rect x="29" y="63" width="18" height="18" fill="#f7c64e"/><rect x="47" y="72" width="18" height="18" fill="#e5a83c"/><rect x="65" y="63" width="18" height="18" fill="#f7c64e"/><rect x="83" y="63" width="18" height="18" fill="#d58b25"/>
+    <rect x="29" y="81" width="18" height="18" fill="#d58b25"/><rect x="47" y="90" width="18" height="18" fill="#b87526"/><rect x="65" y="81" width="18" height="18" fill="#d58b25"/>
+    <rect x="47" y="36" width="18" height="18" fill="#39261c"/><rect x="38" y="45" width="18" height="18" fill="#39261c"/><rect x="56" y="45" width="18" height="18" fill="#39261c"/><rect x="47" y="54" width="18" height="18" fill="#39261c"/>
+    <rect x="38" y="45" width="9" height="9" fill="#8cbb63"/><rect x="56" y="54" width="9" height="9" fill="#8cbb63"/><rect x="47" y="63" width="9" height="9" fill="#8cbb63"/>
+    <rect x="47" y="108" width="18" height="18" fill="#39754b"/><rect x="47" y="126" width="18" height="9" fill="#39754b"/>
+    <rect x="20" y="99" width="27" height="9" fill="#39754b"/><rect x="20" y="90" width="9" height="9" fill="#39754b"/>
+    <rect x="65" y="108" width="27" height="9" fill="#39754b"/><rect x="83" y="99" width="9" height="9" fill="#39754b"/>
+    <rect x="29" y="108" width="18" height="9" fill="#8be28a"/><rect x="65" y="117" width="18" height="9" fill="#8be28a"/>
+    <rect x="0" y="140" width="110" height="3" fill="#d58b25" opacity=".8"/>
   </g>
-
-  <!-- Prefix: 'THE' -->
-  <text x="260" y="48" text-anchor="middle" font-family="'Impact', 'Arial Black', -apple-system, sans-serif" font-weight="900" font-size="15" letter-spacing="14" fill="#ffffff" filter="url(#shadow)">THE</text>
-
-  <!-- Title: 'BLOOM' -->
-  <!-- Heavy Shadow Underplate -->
-  <text x="260" y="112" text-anchor="middle" font-family="'Impact', 'Arial Black', -apple-system, sans-serif" font-weight="900" font-size="74" letter-spacing="10" fill="#000000" stroke="#000000" stroke-width="12" stroke-linejoin="round">
-    BLOOM
-  </text>
-
-  <!-- Toxic Emerald Halo -->
-  <text x="260" y="112" text-anchor="middle" font-family="'Impact', 'Arial Black', -apple-system, sans-serif" font-weight="900" font-size="74" letter-spacing="10" fill="none" stroke="#3aff8c" stroke-width="4.5" opacity="0.95" filter="url(#bloom-glow)">
-    BLOOM
-  </text>
-
-  <!-- Luminous High-Contrast Bone-White Foreground Face -->
-  <text x="260" y="112" text-anchor="middle" font-family="'Impact', 'Arial Black', -apple-system, sans-serif" font-weight="900" font-size="74" letter-spacing="10" fill="url(#textGrad)" stroke="#05140b" stroke-width="1.6">
-    BLOOM
-  </text>
-
-  <!-- Subtitle rule with bio-nodes -->
-  <path d="M 50,128 L 180,128" stroke="#34d399" stroke-width="2" stroke-linecap="round" opacity="0.75" />
-  <circle cx="186" cy="128" r="3" fill="#4dffa0" />
-  <path d="M 340,128 L 470,128" stroke="#34d399" stroke-width="2" stroke-linecap="round" opacity="0.75" />
-  <circle cx="334" cy="128" r="3" fill="#4dffa0" />
-
-  <!-- Subtitle: SURVIVAL HORROR -->
-  <text x="260" y="132" text-anchor="middle" font-family="'Courier New', monospace" font-weight="900" font-size="11" letter-spacing="8" fill="#ecfdf5" filter="url(#shadow)">
-    SURVIVAL HORROR
-  </text>
+  <g fill="#f1eee1" font-family="monospace" font-weight="900" text-anchor="start">
+    <text x="150" y="78" font-size="53" letter-spacing="3">THE</text>
+    <text x="150" y="128" font-size="53" letter-spacing="1">BLOOM</text>
+  </g>
+  <rect x="151" y="139" width="430" height="3" fill="#d8a13a"/>
+  <text x="153" y="155" fill="#8da08f" font-family="monospace" font-size="10" letter-spacing="4">SURVIVE WHAT TAKES ROOT</text>
 </svg>
