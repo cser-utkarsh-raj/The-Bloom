@@ -37,7 +37,7 @@ function startLevel(i){
  G.level=i;const D=DIFFS[S.difficulty];
  G.hp=Math.min(G.maxHp,G.hp+(i>0?25:0));if(i===0&&!G.snap){G.hp=G.maxHp;}
  G.snap={hp:G.hp,meds:G.meds,infect:G.infect,score:G.score,trust:G.trust,kills:0,maxCombo:G.maxCombo||0};G.kills=0;
- LV=BUILD[i]();state='play';mapBig=false;
+ LV=BUILD[i]();state='play';mapBig=false;if(typeof startMusicForLevel==='function')startMusicForLevel(i);
  if(LV.ui)document.documentElement.style.setProperty('--acc',LV.ui);
  $('ov').style.display='none';$('hud').style.display='block';ovAnim=null;
  portraits();Object.keys(cache).forEach(k=>delete cache[k]);
