@@ -48,10 +48,10 @@ function buildL2(){
  L.pickup('med',20,20);L.pickup('med',4,3.5);L.pickup('anti',26.5,12);L.pickup('note',8,17,'A shattered framed photo from the beach — Maya, David, little Nancy. The crack in the glass runs straight across Maya\'s smiling face.');
  L.finish();L.start(6,18,5,19.3);
  const boss=new Enemy(L,'boss',22,11);L.boss=boss;L.enemies.push(boss);let intro=3.5,addT=12;
- L.bossPhase=ph=>{shake(16);SFX.roar();say(ph===2?'"Run, David… I can\'t… hold it…"':'"Nancy… my baby…"',3500,'#d68cff');banner(ph===2?'SHE CHARGES':'SHE SCREAMS','#d68cff');for(let i=0;i<2;i++){const s=L.farSpawn(10);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}};
- L.onBossDead=()=>{say('"Thank you… David… keep her safe."',4500,'#d68cff');for(const e of L.enemies)if(e!==boss&&!e.dead)e.dead=true;L.win(3);};
+ L.bossPhase=ph=>{shake(16);SFX.roar();say(ph===2?'"David, run! Get away from me, my body won\'t listen!"':'"Nancy... my sweet girl... forgive your mom..."',3600,'#d68cff');banner(ph===2?'SHE CHARGES':'SHE SCREAMS','#d68cff');for(let i=0;i<2;i++){const s=L.farSpawn(10);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}};
+ L.onBossDead=()=>{say('"Thank you... it\'s finally quiet... David, promise me... don\'t let them touch Nancy..."',4500,'#d68cff');for(const e of L.enemies)if(e!==boss&&!e.dead)e.dead=true;L.win(3);};
  L.objText=()=>boss.awake?`MAYA — ${Math.max(0,Math.round(boss.hp/boss.max*100))}%`:'SOMETHING IS IN THE ROOM…';
- L.tick=dt=>{if(!boss.awake){intro-=dt;if(intro<=0){boss.awake=true;boss.bs='walk';say('"David…?"',2600,'#d68cff');banner('MAYA','#d68cff');SFX.roar();}return;}
+ L.tick=dt=>{if(!boss.awake){intro-=dt;if(intro<=0){boss.awake=true;boss.bs='walk';say('"David...? Is that you...? Why does everything look red...?"',2800,'#d68cff');banner('MAYA','#d68cff');SFX.roar();}return;}
   addT-=dt;if(addT<=0){addT=Math.max(8,18/D.hp);if(L.alive()<2+boss.phase){const s=L.farSpawn(10);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}}};
  return L;
 }
@@ -86,7 +86,7 @@ function buildL3(){
  L.finish();L.start(19,126,18.2,126);
  groups.forEach(([y,n],gi)=>{for(let i=0;i<n;i++){const[x,yy]=L.freeSpot(13,25,y-3,y+3,.7);const t=gi===3&&i===0?'stalker':gi===5&&i===0?'bloated':(gi>=6&&i===2)?'stalker':'drifter';L.spawnEnemy(t,x,yy,{pr:4});}});
  L.spawn=[[19,60]];
- L.pickup('med',16,112);L.pickup('med',32,62);L.pickup('med',21,26);L.pickup('anti',20,80);L.pickup('note',16,122,'A radio, still warm: "…all survivors, the evacuation point is north of the highway. Do not stop for anyone. We repeat — do not stop."');L.pickup('note',33,44,'A note taped to the shutters: "CLOSED. They came out of the water. My son is on the second floor. Please, somebody read this."');
+ L.pickup('med',16,112);L.pickup('med',32,62);L.pickup('med',21,26);L.pickup('anti',20,80);L.pickup('note',16,122,'A cracked emergency radio, hissing static: "...Civilian advisory: Route 101 north is compromised. Coastal Stalkers are nesting in overpasses. If traveling with children, move under heavy rainfall and stay silent..."');L.pickup('note',33,44,'A cardboard sign zip-tied to a stranded ambulance: "SHELTER DOORS SEALED. They breached the lower deck. If anyone finds our girl in the yellow raincoat, tell her Dad tried to come back."');
  L.objText=()=>'REACH THE EVACUATION POINT — '+Math.max(0,Math.round(L.player.y-7))+' m';
  L.tick=dt=>{const p=L.player,d=L.daughter;L.hint='';if(p.y<11&&Math.abs(p.x-19)<7){if(dst(p.x,p.y,d.x,d.y)<6||d.carried)L.win();else L.hint='WAIT FOR NANCY';}};
  return L;
@@ -111,7 +111,7 @@ function buildL4(){
  L.objText=()=>`HOLD THE SHELTER — ${Math.max(0,Math.ceil(rem))}s`;
  L.tick=dt=>{rem-=dt;wt-=dt;if(wt<=0){wt=8;const c=3+Math.floor(n++*.9)+(S.difficulty==='nightmare'?1:0)-(S.difficulty==='story'?1:0);for(let i=0;i<c;i++)queue.push(Math.random()<.14?'stalker':Math.random()<.1?'bloated':'drifter');banner('THEY ARE AT THE DOORS','#ff5a5a');}
   if(queue.length){spT-=dt;if(spT<=0){spT=D.gap*.6;const s=pick(L.spawn);L.spawnEnemy(queue.shift(),s[0],s[1],{hunt:true});}}
-  if(rem<=0){for(const e of L.enemies)if(!e.dead){e.dead=true;}say('Headlights. The convoy has arrived.',3500);L.win();}};
+  if(rem<=0){for(const e of L.enemies)if(!e.dead){e.dead=true;}say('Heavy diesel engines outside. The military convoy has breached the gate!', 3500);L.win();}};
  return L;
 }
 function buildL5(){
@@ -139,7 +139,7 @@ function buildL5(){
  for(const[y0,y1,z,n]of zb)for(let i=0;i<n;i++){const[x,y]=L.freeSpot(13,25,y0+3,y1-2,.7);const t=i%5===4?'bloated':i%3===2?'stalker':'drifter';L.spawnEnemy(t,x,y,{zone:z,pr:4});}
  L.spawn=[[14,112],[24,112],[14,76],[24,76],[14,35],[24,35],[19,128],[19,76]];
  L.pickup('med',17,126);L.pickup('med',23,110);L.pickup('med',17,88);L.pickup('med',23,70);L.pickup('med',17,46);L.pickup('med',23,28);L.pickup('anti',21,118);L.pickup('anti',17,74);L.pickup('anti',23,40);
- L.pickup('note',10,132,'A looping military broadcast: "All civilians proceed to Bunker 7. Coastal bombardment begins at dawn. This is not a drill."');L.pickup('note',28.5,58,'Scratched high on a wall, where somebody climbed: "It was never an accident. The ocean is taking back what we took from it."');
+ L.pickup('note',10,132,'Emergency broadcast receiver on loop: "Attention remaining personnel and civilians: Incendiary strike package Iron Bloom is authorized. All surface coordinates in Sector 9 will be cleansed by 05:30. Reach Bunker 7 blast doors immediately."');L.pickup('note',28.5,58,'Scratched into the reinforced concrete barrier with a rusty rebar spike: "The ocean didn\'t catch a disease. It developed an immune response against us."');
  let timer=200*D.timer,shellT=8,reT=14,opened={1:false,2:false};
  L.objText=()=>{const t=Math.max(0,Math.ceil(timer));return '⚠ BOMBING IN '+Math.floor(t/60)+':'+String(t%60).padStart(2,'0')+' — REACH THE BUNKER';};
  L.tick=dt=>{const p=L.player,d=L.daughter;L.hint='';timer-=dt;

@@ -946,11 +946,11 @@ function showControls(){showOv(`<div class="ttl" style="font-size:34px">HOW TO P
  <div class="txt" style="font-size:13px;color:#7dffb0">Halo rings on the ground show who is who: <b style="color:#3aff70">green</b> is healthy, <b style="color:#ffd34d">yellow</b> to <b style="color:#ff8a3a">orange</b> is rising infection, <b style="color:#ff4040">red</b> is infected, <b style="color:#c040ff">violet</b> is Maya.</div>
  <div class="row"><button class="btn" onclick="showMenu()">\u2190 BACK</button></div>`,'menu');}
 const CHAPTER_DESC=[
- 'Defend your home against the first infected wave.',
- 'Face Maya — the woman you loved, now consumed by The Bloom.',
- 'Escape through the abandoned highway. Rain. Wreckage. Drifters.',
- 'Hold the school shelter while Nancy hides. Sixty seconds of hell.',
- 'Reach the bunker before the bombing begins. The final sprint.'
+ 'The grid fails at sundown. Barricade the house and defend Nancy against the first violent surge of the infected.',
+ 'Maya has returned to the bedroom, transformed into an aggressive bio-host. Put down the woman you loved before she reaches your daughter.',
+ 'A four-mile graveyard of rain-drenched wrecks along Route 101. Evade the roof-stalkers and keep Nancy close in the dark.',
+ 'The civilian intake center is overwhelmed. Fortify the double doors alongside an exhausted patrolman as swarms breach the courtyard.',
+ 'Tactical airstrikes will incinerate the coastline at dawn. Break through the quarantine barricades and get Nancy inside Bunker 7.'
 ];
 function showChapters(){const n=['HOME DEFENSE','THE BLOOM-WIFE','THE ROAD','SCHOOL SHELTER','FINAL ESCAPE'];
  const cards=n.map((x,i)=>{
@@ -985,7 +985,6 @@ function showMenu(){applyTheme();settingsBack='menu';state='menu';LV=null;$('hud
  showOv(`<div class="menu-shell">
   <img class="brand-logo" src="logo.svg" alt="THE BLOOM">
   <div class="menu-rule"></div>
-  <div class="sub">SURVIVAL HORROR</div>
   <div class="menu-tagline">"A father. A daughter. A world consumed."</div>
   <div class="menu-actions">
    ${unlocked>0?`<button class="btn continue-btn" onclick="chapter(${contCh})">CONTINUE</button>`:''}

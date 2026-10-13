@@ -38,17 +38,17 @@ class Player{
   if(hits){shake(3);}
  }
  useMed(){
-  const lv=this.lv,dd=lv.daughter;if(this.healCd>0)return;if(G.meds<=0){say('No medkits left.',1800);return;}
+  const lv=this.lv,dd=lv.daughter;if(this.healCd>0)return;if(G.meds<=0){say('No first-aid supplies remaining.', 1800);return;}
   const near=dd.carried||dst(this.x,this.y,dd.x,dd.y)<3.8,pf=G.hp/G.maxHp,df=dd.hp/dd.max;
   if(near&&df<pf&&df<.95){dd.hp=Math.min(dd.max,dd.hp+35);dd.trust=Math.min(100,dd.trust+8);lv.fl(dd.x,dd.y,'+35 NANCY','#ffd34d');}
   else if(G.hp<G.maxHp){G.hp=Math.min(G.maxHp,G.hp+35);lv.fl(this.x,this.y,'+35 HP','#7dffb0');}
-  else{say('Already at full health.',1500);return;}
+  else{say('No open wounds to dress.', 1500);return;}
   G.meds--;this.healCd=1;SFX.heal();for(let i=0;i<10;i++)lv.part(this.x,this.y,.5,rnd(-1,1),rnd(-1,1),rnd(1,2),.7,'#7dffb0',3,false);
  }
  toggleCarry(){const lv=this.lv,dd=lv.daughter;
   if(this.carry){this.carry=false;dd.carried=false;dd.x=this.x-Math.cos(this.f)*.8;dd.y=this.y-Math.sin(this.f)*.8;if(lv.hitSolid(dd.x,dd.y,.25)){dd.x=this.x;dd.y=this.y;}}
   else if(dst(this.x,this.y,dd.x,dd.y)<2.6){this.carry=true;dd.carried=true;say('"I\'ve got you, Nancy. Don\'t look back."',2000);}
-  else say('Nancy is too far away.',1500);}
+  else say('Nancy is out of reach.', 1500);}
  hurt(d,ang){const lv=this.lv;if(this.inv>0||lv.over)return;if(!Number.isFinite(d)||d<=0)d=1;G.hp-=d;this.inv=.55;this.hurtT=.25;G.infect=Math.min(100,G.infect+1.5);SFX.hurt();shake(7);
   const h=$('hurt');h.style.opacity=1;setTimeout(()=>h.style.opacity=0,220);
   for(let i=0;i<8;i++)lv.part(this.x,this.y,.9,rnd(-2,2),rnd(-2,2),rnd(1,3),.5,'#a01010',2.5);lv.moveEnt(this,Math.cos(ang||0)*.3,Math.sin(ang||0)*.3);
@@ -76,7 +76,7 @@ const ET={
  stalker:{hp:38,spd:2.7,dmg:11,r:.3,sense:9,reach:.5,windT:.24,cd:1,sc:1.05},
  bloated:{hp:95,spd:1.05,dmg:14,r:.5,sense:6,reach:.6,windT:.5,cd:1.4,sc:1.3},
  boss:{hp:430,spd:2.2,dmg:20,r:.55,sense:99,reach:.9,windT:.5,cd:1.2,sc:1.4}};
-const BOSSLINES=['"David… it hurts…"','"Where is my little girl?"','"I can hear the ocean…"','"Don\'t look at me…"','"Please… stop me…"','"I was only trying to feed them…"'];
+const BOSSLINES=['"David... it\'s burning inside my skull... make it stop..."','"Where is Nancy?! Tell me she\'s safe... please!"','"The noise won\'t stop... like black waves drowning my thoughts..."','"Don\'t let Nancy see me like this... please David... shoot me..."','"My hands... I can\'t control my own hands anymore..."','"It hurts so much... David, forgive me... I can\'t stop moving..."'];
 class Enemy{
  constructor(lv,type,x,y,o){o=o||{};const T0=ET[type],D=DIFFS[S.difficulty];
   Object.assign(this,{lv,type,x,y,r:T0.r,hp:T0.hp*D.hp,spd:T0.spd*D.spd,dmg:T0.dmg*D.dmg,sense:T0.sense,reach:T0.reach,windT:T0.windT,cdMax:T0.cd,sc:T0.sc,state:'patrol',f:rnd(0,6.28),ph:rnd(0,6),cd:rnd(0,.8),wind:0,hurtT:0,stun:0,dead:false,dying:false,fuse:0,hx:x,hy:y,pr:o.pr||3.5,pauseT:rnd(0,2),wp:null,wpT:0,hunt:!!o.hunt,zone:o.zone||0,tgt:'p',lostT:0,ax:x,ay:y,searchT:0,lunge:0,lungeCd:rnd(1,3),seed:Math.random*10,shirt:pick(['#6b4a3a','#4a5a6b','#5a4a5a','#6b6b4a','#3f5f4f','#7a5a3a'])});
@@ -139,6 +139,6 @@ class Enemy{
   const mult=G.maxCombo>=2?(1+Math.min(G.maxCombo,5)*.1):1;/* finisher streak boosts score up to +50% */
   const pts=Math.round(100*mult);G.score+=pts;lv.fl(this.x,this.y,'+'+pts+(mult>1?' ×'+mult.toFixed(1):''),'#ffd34d');lv.stain(this.x,this.y,rnd(.8,1.3),this.type==='bloated'?'#2f5a14':'#5a0a0a');SFX.kill();
   for(let i=0;i<14;i++)lv.part(this.x,this.y,.6,rnd(-3,3),rnd(-3,3),rnd(1,4),.8,'#8a1010',rnd(2,4));
-  if(this.type==='bloated'){this.dying=true;this.fuse=.95;this.hp=1;say('The bloated one is about to burst — run!',1800,'#c8ff7a');return;}
+  if(this.type==='bloated'){this.dying=true;this.fuse=.95;this.hp=1;say('It\'s rupturing — back away from the acid burst!', 2000, '#c8ff7a');return;}
   this.dead=true;if(this.type==='boss')lv.onBossDead(this);}
 }

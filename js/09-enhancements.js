@@ -334,11 +334,11 @@ function camTick(lv, dt) {
 }
 
 /* ============================ 5. ANAYA BEHAVIOUR ======================== */
-const L_DANGER = ['"Baba!"', '"Baba, behind you!"', '"They\'re coming!"'];
-const L_HURT = ['"Baba, you\'re hurt…"', '"Please be careful, Baba."'];
-const L_CARRY = ['"I\'m okay, Baba."', '"Don\'t put me down yet…"'];
-const L_LOOK = ['"Baba, look!"', '"I found something, Baba!"'];
-const L_IDLE = ['"Is Amma coming home?"', '"That sounded like Amma…"', '"How far is the evacuation point?"', '"Are those kids okay?"', '"Will we be safe underground?"'];
+const L_DANGER = ['"Dad, look out!"', '"Behind you, Dad!"', '"They\'re coming from the dark!"', '"Daddy, watch out!"'];
+const L_HURT = ['"Dad, you\'re bleeding... please be careful..."', '"Daddy, don\'t push yourself too hard..."'];
+const L_CARRY = ['"Hold onto me tight, Dad..."', '"I\'ve got you, Daddy. Just keep moving."'];
+const L_LOOK = ['"Dad, look over there by the crates..."', '"I think someone dropped supplies here, Dad!"'];
+const L_IDLE = ['"Is Mom really gone, Dad? Be honest with me..."', '"The air smells like rotting salt and iron..."', '"How much further to the evacuation point?"', '"I don\'t want to turn into one of those monsters, Daddy..."', '"Will we ever be able to go back home?"'];
 function bubble(txt, cat, gap, dur) {
   if (E.cd[cat] > E.t) return; if (E.bub && E.bub.t > 0 && cat !== 'danger' && cat !== 'hurt2') return;
   E.bub = { txt, t: dur || 3, max: dur || 3 }; E.cd[cat] = E.t + (gap || 20);
@@ -360,7 +360,7 @@ function anayaTick(lv, d, dt) {
       if (el > .15) lv.moveEnt(a, ex / el * 1.7 * d, ey / el * 1.7 * d);
     }
   }
-  if (a.hp > (a._hp == null ? a.hp : a._hp) + 1) bubble('"Thank you, Baba."', 'heal', 8, 2.4);
+  if (a.hp > (a._hp == null ? a.hp : a._hp) + 1) bubble('"Thank you, Dad... the bandage helps."', 'heal', 8, 2.4);
   a._hp = a.hp;
   if (a.trust < 30 && a._tl !== 1) { a._tl = 1; bubble('"Baba… don\'t leave me."', 'trust', 30, 3); } else if (a.trust > 60) a._tl = 0;
   E.dlgT -= dt;
@@ -381,7 +381,7 @@ function anayaTick(lv, d, dt) {
 }
 
 /* ============================ 6. HORROR / INFECTION ===================== */
-const WHISPERS = ['"…Baba…"', '"Arjun… come closer…"', '"Do you hear the ocean?"', '"It\'s so quiet down there…"', '"Don\'t stop walking…"'];
+const WHISPERS = ['"...David... why did you leave me on the shore...?"', '"...David... come into the water... it doesn\'t hurt anymore..."', '"...Do you hear the spores singing in the surf...?"', '"...She has your eyes, David... bring our daughter to me..."', '"...It\'s so peaceful down in the deep... let go..."'];
 function genVeins() {
   let s = 4177; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; E.veins = [];
   for (let i = 0; i < 16; i++) {
@@ -426,7 +426,7 @@ function chapterTick(lv, d) {
   else if (id === 3) { ev('pa', 14, 30, () => SFX.crackle()); ev('kn', 18, 35, () => SFX.knock()); ev('surge', 20, 40, () => { E.evT.surgeA = .12; E.dip = .5; }); if (E.evT.surgeA > 0) E.evT.surgeA -= d; }
   else if (id === 4) { ev('rb', 5, 10, () => { SFX.rumble(); shake && shake(3); }); ev('si', 40, 70, () => SFX.siren(.02)); }
   const lg = lv.lightning || 0;
-  if (lg >= .99 && E.lightningPrev < .99) { setTimeout(() => { if (E.lv === lv) { SFX.thunder(); const a = lv.daughter; if (a) { a.scared = 1; bubble('"I don\'t like thunder…"', 'thunder', 30, 2.4); } } }, rr(350, 1400)); E.sflash = { a: .12, c: '200,220,255' }; }
+  if (lg >= .99 && E.lightningPrev < .99) { setTimeout(() => { if (E.lv === lv) { SFX.thunder(); const a = lv.daughter; if (a) { a.scared = 1; bubble('"That shook the ground... was that thunder or an airstrike?"', 'thunder', 30, 2.4); } } }, rr(350, 1400)); E.sflash = { a: .12, c: '200,220,255' }; }
   E.lightningPrev = lg;
 }
 
