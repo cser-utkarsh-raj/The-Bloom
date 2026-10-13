@@ -57,6 +57,24 @@ function setVol(){if(MG)MG.gain.value=S.volume;}
 function tone(f,dur,type,vol,slide){if(!AC)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,f+slide),t+dur);g.gain.setValueAtTime(vol||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(MG);o.start(t);o.stop(t+dur+.02);}
 function nz(dur,vol,fq){if(!AC)return;const t=AC.currentTime,s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;f.type='bandpass';f.frequency.value=fq||1000;g.gain.setValueAtTime(vol||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(MG);s.start(t,Math.random()*.5,dur);}
 const SFX={swing:()=>nz(.12,.1,2500),hit:()=>{tone(130,.14,'square',.1,-70);nz(.1,.12,700);},hurt:()=>tone(95,.28,'sawtooth',.18,-45),kill:()=>nz(.2,.12,400),heal:()=>tone(520,.2,'sine',.12,260),pick:()=>tone(760,.12,'triangle',.1,300),boom:()=>{nz(.8,.35,150);tone(60,.8,'sine',.3,-30);},roar:()=>tone(110,.9,'sawtooth',.16,-60),shell:()=>tone(900,.8,'sine',.05,-700),shot:()=>{nz(.12,.2,1800);tone(300,.1,'square',.08,-200);}};
+/* Original adaptive score synthesized locally with Web Audio; no external music files. */
+const MUSIC={level:-1,step:0,pads:[],timer:null};
+function startMusicForLevel(level){
+ audioInit();if(!AC||!MG)return;MUSIC.level=level;MUSIC.step=0;
+ const roots=[55,49,52,46,41],root=roots[clamp(level|0,0,4)];
+ if(!MUSIC.pads.length){
+  for(const [ratio,type,gain] of [[1,'triangle',.024],[1.498,'sine',.012],[2.002,'sine',.006]]){
+   const o=AC.createOscillator(),g=AC.createGain(),filter=AC.createBiquadFilter();o.type=type;o.frequency.value=55*ratio;filter.type='lowpass';filter.frequency.value=460;g.gain.value=.0001;o.connect(filter);filter.connect(g);g.connect(MG);o.start();MUSIC.pads.push({o,g,filter,ratio,maxGain:gain});
+  }
+  MUSIC.timer=setInterval(()=>{
+   if(!AC||!MG)return;
+   const playing=state==='play',base=roots[clamp(MUSIC.level|0,0,4)];
+   for(const p of MUSIC.pads){p.o.frequency.setTargetAtTime(base*p.ratio,AC.currentTime,.8);p.g.gain.setTargetAtTime(playing?p.maxGain:.0001,AC.currentTime,playing?1.8:.35);}
+   if(playing&&S.volume>.001){const scales=[[0,3,7,10,7,5,3,2],[0,3,5,7,10,7,5,2],[0,2,5,7,9,7,5,2],[0,3,7,8,10,8,7,3],[0,3,5,7,10,8,7,2]][clamp(MUSIC.level|0,0,4)];const n=scales[MUSIC.step%scales.length],octave=MUSIC.step%4===0?2:1;tone(base*Math.pow(2,n/12)*octave,1.35,'sine',MUSIC.level===1?.042:.027,-2);if(MUSIC.step%4===0)tone(base*2,.8,'triangle',.018,1);MUSIC.step++;}
+  },1450);
+ }
+ for(const p of MUSIC.pads){p.o.frequency.setTargetAtTime(root*p.ratio,AC.currentTime,1.2);}
+}
 
 /* ---------- input ---------- */
 const keys={},hit={},mouse={x:0,y:0,down:false,click:false};
