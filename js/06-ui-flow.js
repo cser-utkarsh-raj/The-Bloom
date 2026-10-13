@@ -955,13 +955,13 @@ function showControls(){showOv(`<div class="ttl" style="font-size:34px">HOW TO P
  <div class="txt" style="font-size:13px;color:#7dffb0">Halo rings on the ground show who is who: <b style="color:#3aff70">green</b> is healthy, <b style="color:#ffd34d">yellow</b> to <b style="color:#ff8a3a">orange</b> is rising infection, <b style="color:#ff4040">red</b> is infected, <b style="color:#c040ff">violet</b> is Maya.</div>
  <div class="row"><button class="btn" onclick="showMenu()">\u2190 BACK</button></div>`,'menu');}
 const CHAPTER_DESC=[
- 'The grid fails at sundown. Barricade the house and defend Nancy against the first violent surge of the infected.',
- 'Maya has returned to the bedroom, transformed into an aggressive bio-host. Put down the woman you loved before she reaches your daughter.',
- 'A four-mile graveyard of rain-drenched wrecks along Route 101. Evade the roof-stalkers and keep Nancy close in the dark.',
- 'The civilian intake center is overwhelmed. Fortify the double doors alongside an exhausted patrolman as swarms breach the courtyard.',
- 'Tactical airstrikes will incinerate the coastline at dawn. Break through the quarantine barricades and get Nancy inside Bunker 7.'
+ 'The power grid is dead. Hold the family home against three waves before the front door gives way.',
+ 'Maya is still somewhere inside the thing that has taken her body. Survive the encounter — and hear what remains of her.',
+ 'Cross the rain-lashed wreckage of Route 101 while infected stalkers hunt from the dark.',
+ 'Stand with the last defenders of St. Jude’s as the shelter is overrun.',
+ 'A military strike is minutes away. Reach Bunker 7 with Nancy or lose everything.'
 ];
-function showChapters(){const n=['HOME DEFENSE','THE BLOOM-WIFE','THE ROAD','SCHOOL SHELTER','FINAL ESCAPE'];
+function showChapters(){const n=['Home Defence','The Face I Loved','Miles of Silence','No Safe Haven','The Point Of No Return'];
  const cards=n.map((x,i)=>{
   const isUnlocked=i<=unlocked;
   const rawB=(typeof bloomScores!=='undefined'&&bloomScores)?bloomScores[i]:null;
