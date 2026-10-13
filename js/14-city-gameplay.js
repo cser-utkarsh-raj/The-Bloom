@@ -52,7 +52,10 @@ function cityKit(L, cfg) {
   const setF = (x, y, m, force) => { if (x < 0 || y < 0 || x >= L.w || y >= L.h) return; if (!force && inO(x, y)) return; L.floor[y][x] = m; };
   const fillF = (x0, y0, x1, y1, m) => { for (let y = Math.floor(y0); y < Math.ceil(y1); y++) for (let x = Math.floor(x0); x < Math.ceil(x1); x++) setF(x, y, m); };
   const isRoad = m => m === 'road' || m === 'dashX' || m === 'dashY' || m === 'zebraX' || m === 'zebraY';
-  const A = (k, x, y, o) => L.add(k, x, y, o);
+  const A = (k, x, y, o) => {
+    if (Math.hypot(x - 19, y - 126) < 6) return null;
+    return L.add(k, x, y, o);
+  };
   // 2. connectors through the original map (L3): clear props in the strip
   for (const r of cfg.rows) if (r.force) { const x1 = ow, y0 = r.y0 - 1, y1 = r.y1 + 1; L.props = L.props.filter(p => !(p.x < x1 && p.x + p.w > r.x0 && p.y < y1 && p.y + p.d > y0)); }
   // 3. roads (7 wide, dashed centre line, intersections, crosswalks)

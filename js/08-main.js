@@ -8,5 +8,5 @@ function frame(now){
  else if(!ovAnim){setScreen();cx.fillStyle='#03070a';cx.fillRect(0,0,W,H);}
  for(const k in hit)hit[k]=false;mouse.click=false;
 }
-function boot(){resize();makeTextures();makeGrain();applyTheme();showMenu();requestAnimationFrame(frame);}
+function boot(){resize();makeTextures();makeGrain();applyTheme();const cmd=new URLSearchParams(window.location.search).get('cmd');if(cmd==='chapters')showChapters();else if(cmd==='settings')showSettings();else showMenu();requestAnimationFrame(frame);}
 boot();

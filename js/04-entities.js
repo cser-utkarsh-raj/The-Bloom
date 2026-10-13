@@ -57,6 +57,7 @@ class Player{
 class Daughter{
  constructor(lv,x,y){Object.assign(this,{lv,x,y,r:.25,max:Math.round(100*(S.difficulty==='story'?1.3:1)),carried:false,trust:G.trust,ph:0,scared:0,f:0,hT:0});this.hp=this.max;}
  update(dt){const lv=this.lv,p=lv.player;this.hT-=dt;if(this.carried){this.x=p.x;this.y=p.y;this.trust=Math.min(100,this.trust+dt*2);return;}
+  if(lv.hitSolid(this.x,this.y,this.r)){const pa=Math.atan2(p.y-this.y,p.x-this.x);for(let k=1;k<=8;k++){const ang=pa+(k%2?1:-1)*Math.floor(k/2)*0.6;const qx=this.x+Math.cos(ang)*0.45,qy=this.y+Math.sin(ang)*0.45;if(!lv.hitSolid(qx,qy,this.r)){this.x=qx;this.y=qy;break;}}}
   const d=dst(this.x,this.y,p.x,p.y);let near=false;for(const e of lv.enemies)if(!e.dead&&e.state==='chase'&&dst(e.x,e.y,this.x,this.y)<5){near=true;break;}
   this.scared=near?Math.min(1,this.scared+dt*2):Math.max(0,this.scared-dt);
   if(d<3)this.trust=Math.min(100,this.trust+dt*1.2);else if(d>9)this.trust=Math.max(0,this.trust-dt*3);

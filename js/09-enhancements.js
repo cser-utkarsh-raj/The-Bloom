@@ -528,6 +528,7 @@ function lateFX(lv) {
 
 /* ============================ 9. BOSS RE-DESIGN ========================= */
 function drawBoss(e) {
+  if (typeof drawBloomWife === 'function') { drawBloomWife(e); return; }
   const fl = e.hurtT > 0, rage = e.phase > 1, pu = .5 + .5 * Math.sin(T * 3), sc = 1.38;
   const fx = Math.cos(e.f), fy = Math.sin(e.f), px = -fy, py = fx, front = fx + fy > -.2;
   shadow(e.x, e.y, .85, .4);
@@ -755,14 +756,14 @@ function installHooks() {
   });
 
   wrapGlobal('drawEnemy', orig => function (e) {
-    try { if (Math.abs(isx(e.x, e.y) - CX) > W / 2 / Z + 140 || Math.abs(isy(e.x, e.y) - CY) > H / 2 / Z + 200) return; } catch (_) {}
-    if (e.type === 'boss') { try { drawBoss(e); return; } catch (err) { warn('boss', err); } }
+    try { if (Math.abs(isx(e.x, e.y) - camX) > W / 2 / Z + 140 || Math.abs(isy(e.x, e.y) - camY) > H / 2 / Z + 200) return; } catch (_) {}
+    if (e.type === 'boss') { try { if (typeof drawBloomWife === 'function') drawBloomWife(e); else drawBoss(e); return; } catch (err) { warn('boss', err); } }
     const k = e._kick > 0 ? e._kick : 0;
     if (k > 0) { const ox = Math.cos(e._kdir || 0) * k * .18, oy = Math.sin(e._kdir || 0) * k * .18; e.x += ox; e.y += oy; try { return orig(e); } finally { e.x -= ox; e.y -= oy; } }
     return orig(e);
   });
   wrapGlobal('drawPickup', orig => function (k, t) {
-    try { if (Math.abs(isx(k.x, k.y) - CX) > W / 2 / Z + 100 || Math.abs(isy(k.x, k.y) - CY) > H / 2 / Z + 160) return; } catch (_) {}
+    try { if (Math.abs(isx(k.x, k.y) - camX) > W / 2 / Z + 100 || Math.abs(isy(k.x, k.y) - camY) > H / 2 / Z + 160) return; } catch (_) {}
     return orig(k, t);
   });
   wrapGlobal('audioInit', orig => function () { const had = ac(); orig.apply(this, arguments); if (!had && ac()) setupAudioBus(); });

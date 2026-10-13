@@ -4,10 +4,201 @@ function showOv(html,scene){state=state==='play'?'pause':state;const o=$('ov');o
  else{o.style.background='rgba(0,0,0,.62)';$('oc').style.display='none';ovAnim=null;}}
 
 /* ============================================================
-   PIXEL-ART LEVEL SCENES - Story-driven visuals
+   PIXEL-ART LEVEL SCENES - Story-driven visuals with Live Effects
    ============================================================ */
-function drawScene(g,w,h,type,t){
- const r=seeded(getSeed()+type.length*100);
+const SCENE_IMGS = {};
+const SCENE_SRCS = {
+  menu: 'assets/art/home_bg.png',
+  home: 'assets/art/chapter1.jpg',
+  wife: 'assets/art/chapter2.jpg',
+  road: 'assets/art/chapter3.jpg',
+  school: 'assets/art/chapter4.jpg',
+  bunker: 'assets/art/chapter5.jpg',
+  end: 'assets/art/chapter5.jpg',
+  dead: 'assets/art/chapter2.jpg',
+  shop: 'assets/art/home_bg.png'
+};
+
+function getSceneImg(type) {
+  const src = SCENE_SRCS[type] || SCENE_SRCS.menu;
+  if (!SCENE_IMGS[src]) {
+    const img = new Image();
+    img.src = src;
+    img.loaded = false;
+    img.onload = () => { img.loaded = true; };
+    SCENE_IMGS[src] = img;
+  }
+  return SCENE_IMGS[src];
+}
+
+function drawLiveSceneEffects(g, w, h, type, t, r) {
+  g.save();
+
+  // 1. Scene-specific dynamic lighting & flares
+  if (type === 'wife' || type === 'dead') {
+    // Bioluminescent floral aura centered around Maya
+    const mx = w * 0.5, my = h * 0.48;
+    const pulse = 0.35 + 0.22 * Math.sin(t * 3);
+    const rad = g.createRadialGradient(mx, my, 10, mx, my, h * 0.48);
+    rad.addColorStop(0, `rgba(195,90,255,${pulse * 0.45})`);
+    rad.addColorStop(0.5, `rgba(77,255,200,${pulse * 0.25})`);
+    rad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = rad;
+    g.beginPath(); g.arc(mx, my, h * 0.48, 0, 6.28); g.fill();
+
+    // Weeping glowing teal tear stream
+    const tearAlpha = 0.55 + 0.35 * Math.sin(t * 4);
+    g.strokeStyle = `rgba(77,255,220,${tearAlpha})`;
+    g.lineWidth = 2.5;
+    g.beginPath();
+    g.moveTo(mx - 8, my - 24);
+    g.lineTo(mx - 8 + Math.sin(t * 2) * 2, my + 15);
+    g.stroke();
+
+    // Swirling floral petals
+    for (let i = 0; i < 35; i++) {
+      const px = (mx + Math.cos(t * 0.8 + i * 1.1) * (120 + i * 6)) % w;
+      const py = (my + Math.sin(t * 1.2 + i * 1.5) * (80 + i * 4) + t * 18) % h;
+      const a = 0.2 + 0.3 * Math.sin(t * 2 + i);
+      g.fillStyle = i % 2 ? `rgba(215,110,255,${a})` : `rgba(80,255,180,${a})`;
+      g.beginPath();
+      g.ellipse(px, py, 3 + i % 3, 1.5, t + i, 0, 6.28);
+      g.fill();
+    }
+  } else if (type === 'road') {
+    // Hazard flare reflection
+    const fx = w * 0.14, fy = h * 0.75;
+    const flk = 0.5 + 0.5 * Math.sin(t * 14 + Math.sin(t * 29));
+    const rad = g.createRadialGradient(fx, fy, 5, fx, fy, 140);
+    rad.addColorStop(0, `rgba(255,160,40,${0.45 + 0.25 * flk})`);
+    rad.addColorStop(0.6, `rgba(255,80,20,${0.15 + 0.1 * flk})`);
+    rad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = rad;
+    g.beginPath(); g.arc(fx, fy, 140, 0, 6.28); g.fill();
+  } else if (type === 'home' || type === 'menu') {
+    // Warm lantern pulse in window
+    const wx = w * (type === 'menu' ? 0.52 : 0.25), wy = h * (type === 'menu' ? 0.52 : 0.55);
+    const rad = g.createRadialGradient(wx, wy, 4, wx, wy, 90);
+    const flk = 0.4 + 0.2 * Math.sin(t * 3.7);
+    rad.addColorStop(0, `rgba(255,200,90,${flk})`);
+    rad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = rad;
+    g.beginPath(); g.arc(wx, wy, 90, 0, 6.28); g.fill();
+  } else if (type === 'school') {
+    // Rotating red beacon sweep
+    const bx = w * 0.5, by = h * 0.38;
+    const sweepAng = t * 4;
+    g.fillStyle = `rgba(255,40,40,${0.35 + 0.2 * Math.sin(t * 5)})`;
+    g.beginPath();
+    g.moveTo(bx, by);
+    g.arc(bx, by, w * 0.35, sweepAng - 0.3, sweepAng + 0.3);
+    g.closePath();
+    g.fill();
+  } else if (type === 'bunker' || type === 'end') {
+    // Dawn artillery smoke and rising fire embers
+    for (let i = 0; i < 30; i++) {
+      const ex = (w * 0.2 + (i * 73 + t * 22) % w) % w;
+      const ey = h * 0.9 - ((t * 45 + i * 47) % (h * 0.75));
+      const a = 0.3 + 0.35 * Math.sin(t * 3 + i);
+      g.fillStyle = `rgba(255,${120 + (i % 5) * 25},40,${a})`;
+      g.beginPath();
+      g.arc(ex + Math.sin(t * 2 + i) * 8, ey, 1.5 + i % 2, 0, 6.28);
+      g.fill();
+    }
+  }
+
+  // 2. Volumetric rolling fog on lower half (outdoor scenes)
+  if (type !== 'wife' && type !== 'dead') {
+    for (let k = 0; k < 3; k++) {
+      g.fillStyle = `rgba(15,25,35,${0.12 + k * 0.06})`;
+      g.beginPath();
+      const baseY = h * (0.62 + k * 0.11);
+      g.moveTo(0, h);
+      for (let x = 0; x <= w; x += 24) {
+        const y = baseY + Math.sin(x * 0.007 + t * (0.4 + k * 0.25) + k * 2) * (16 + k * 5);
+        g.lineTo(x, y);
+      }
+      g.lineTo(w, h);
+      g.closePath();
+      g.fill();
+    }
+  }
+
+  // 3. Live rain streaks on rainy scenes
+  if (type === 'menu' || type === 'home' || type === 'road' || type === 'school') {
+    g.strokeStyle = 'rgba(190,225,255,0.4)';
+    g.lineWidth = 1.2;
+    for (let i = 0; i < 75; i++) {
+      const rx = ((i * 53 + t * 520) % (w + 80)) - 40;
+      const ry = (i * 97 + t * 940) % h;
+      const len = 15 + (i % 6) * 3;
+      g.beginPath();
+      g.moveTo(rx, ry);
+      g.lineTo(rx - 4, ry + len);
+      g.stroke();
+      if (ry + len > h * 0.82 && (i % 3 === 0)) {
+        g.fillStyle = 'rgba(190,225,255,0.25)';
+        g.beginPath();
+        g.ellipse(rx - 4, h * 0.84 + (i % 16), 4, 1.5, 0, 0, 6.28);
+        g.fill();
+      }
+    }
+    // Distant lightning flash
+    if (Math.sin(t * 0.5) > 0.985 && Math.sin(t * 25) > 0.2) {
+      g.fillStyle = 'rgba(200,230,255,0.18)';
+      g.fillRect(0, 0, w, h);
+    }
+  }
+
+  // 4. Bioluminescent spores drifting across screen
+  for (let i = 0; i < 35; i++) {
+    const sx = (w * 0.05 + (i * 59 + t * 26) % (w * 0.9));
+    const sy = h * 0.95 - ((t * (26 + (i % 4) * 7) + i * 61) % (h * 0.9));
+    const sway = Math.sin(t * 1.6 + i * 1.4) * 14;
+    const a = 0.2 + 0.35 * Math.sin(t * 2.8 + i);
+    const r = 1.2 + (i % 3) * 0.6;
+    const col = i % 2 === 0 ? `rgba(77,255,160,${a})` : `rgba(215,110,255,${a})`;
+    g.fillStyle = col;
+    g.beginPath();
+    g.arc(sx + sway, sy, r, 0, 6.28);
+    g.fill();
+  }
+
+  // 5. Cinematic radial vignette & CRT scanlines
+  const vig = g.createRadialGradient(w / 2, h / 2, h * 0.35, w / 2, h / 2, Math.max(w, h) * 0.72);
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(0,5,8,0.65)');
+  g.fillStyle = vig;
+  g.fillRect(0, 0, w, h);
+
+  // Subtle CRT scanlines
+  g.fillStyle = 'rgba(0,0,0,0.08)';
+  for (let y = 0; y < h; y += 4) {
+    g.fillRect(0, y, w, 1.5);
+  }
+  g.restore();
+}
+
+function drawScene(g, w, h, type, t) {
+  const r = seeded(getSeed() + type.length * 100);
+  const img = getSceneImg(type);
+  let hasImage = false;
+  if (img && img.loaded && img.naturalWidth > 0) {
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const scale = Math.max(w / iw, h / ih);
+    const dw = iw * scale, dh = ih * scale;
+    const dx = (w - dw) / 2, dy = (h - dh) / 2;
+    g.imageSmoothingEnabled = false;
+    g.drawImage(img, dx, dy, dw, dh);
+    hasImage = true;
+  }
+  if (!hasImage) {
+    drawProceduralFallback(g, w, h, type, t, r);
+  }
+  drawLiveSceneEffects(g, w, h, type, t, r);
+}
+
+function drawProceduralFallback(g, w, h, type, t, r) {
  
  // Clear with theme-appropriate background
  const bgCols={
@@ -629,63 +820,183 @@ function drawScene(g,w,h,type,t){
  }
 }
 
-function seg(key,opts){return`<div class="so">${opts.map(([v,l])=>`<button class="o ${S[key]===v?'a':''}" onclick="setS('${key}',${typeof v==='string'?` '${v}'`:v})">${l}</button>`).join('')}</div>`;}
-function onoff(key){return seg(key,[[true,'ON'],[false,'OFF']]);}
-function setS(k,v){S[k]=v;saveS();applyTheme();if(k==='volume')setVol();showSettings();}
-let settingsBack='menu';
-function showSettings(){const th=THEMES,inGame=state==='play'||state==='pause';
- showOv(`<div class="ttl" style="font-size:34px">SETTINGS</div>
- <div class="h">DIFFICULTY</div><div class="sl" style="text-align:left">${DIFFS[S.difficulty].desc}${inGame?' <span style="color:#ff5a5a">(Applies next run)</span>':''}</div>
- ${seg('difficulty',[['story','STORY'],['survivor','SURVIVOR'],['nightmare','NIGHTMARE']])}
- <div class="h">COLOR THEME</div>${seg('theme',Object.keys(th).map(k=>[k,th[k].name]))}
- <div class="h">GRAPHICS</div>
- <div class="sg">
-  <div><div class="sl">QUALITY</div>${seg('gfx',[['low','LOW'],['medium','MEDIUM'],['high','HIGH']])}</div>
-  <div><div class="sl">BRIGHTNESS</div>${seg('bright',[['dim','DIM'],['normal','NORMAL'],['bright','BRIGHT']])}</div>
-  <div><div class="sl">CAMERA ZOOM</div>${seg('zoom',[[.85,'FAR'],[1,'NORMAL'],[1.2,'CLOSE']])}</div>
-  <div><div class="sl">DYNAMIC LIGHTING</div>${onoff('lighting')}</div>
-  <div><div class="sl">FILM GRAIN</div>${onoff('grain')}</div>
-  <div><div class="sl">RAIN / ASH</div>${onoff('weather')}</div>
-  <div><div class="sl">PARTICLES</div>${onoff('particles')}</div>
-  <div><div class="sl">SCREEN SHAKE</div>${onoff('shake')}</div>
- </div>
- <div class="h">GAMEPLAY &amp; AUDIO</div>
- <div class="sg">
-  <div><div class="sl">AIM ASSIST (AUTO-TARGET)</div>${onoff('assist')}</div>
-  <div><div class="sl">ENEMY HEALTH BARS</div>${onoff('bars')}</div>
-  <div><div class="sl">MINIMAP</div>${onoff('minimap')}</div>
-  <div><div class="sl">SUBTITLES</div>${onoff('subs')}</div>
-  <div><div class="sl">VOLUME</div>${seg('volume',[[0,'OFF'],[.3,'LOW'],[.6,'MED'],[1,'HIGH']])}</div>
- </div>
- <div class="h">ACCESSIBILITY</div>
- <div class="sg">
-  <div><div class="sl">HIGH CONTRAST MODE</div>${onoff('accessibility')}</div>
-  <div><div class="sl">REDUCED MOTION</div>${onoff('reducedMotion')}</div>
- </div>
- <div class="row" style="margin-top:14px"><button class="btn" onclick="${settingsBack==='pause'?'showPause()':'showMenu()'}">\u2190 BACK</button></div>`);}
+function seg(key,opts){return cfgSeg(key,opts);}
+function onoff(key){return cfgOnOff(key);}
+function cfgSeg(key,opts){return`<div class="cfg-options">${opts.map(([v,l])=>`<button class="cfg-opt ${S[key]===v?'active':''}" onclick="setS('${key}',${typeof v==='string'?`'${v}'`:v})">${l}</button>`).join('')}</div>`;}
+function cfgOnOff(key){return cfgSeg(key,[[true,'ON'],[false,'OFF']]);}
+function setS(k,v){S[k]=v;saveS();applyTheme();if(k==='volume'&&typeof setVol==='function')setVol();showSettings();}
+let settingsBack='menu', settingsTab='diff';
+function setTab(t){settingsTab=t;showSettings();}
+
+function showSettings(){
+ const th=THEMES,inGame=state==='play'||state==='pause';
+ const zoomPct=S.zoom===.85?'85%':(S.zoom===1.2?'120%':'100%');
+ const diffCards=['story','survivor','nightmare'].map(k=>{
+  const d=DIFFS[k],sel=S.difficulty===k;
+  return `<div class="diff-card ${k}${sel?' selected':''}" onclick="setS('difficulty','${k}')" style="${sel?`border-left-color:${d.col}`:''}">
+   <div class="diff-card-hdr"><b style="color:${d.col}">${d.name}</b>${sel?'<span class="diff-card-active">ACTIVE</span>':''}</div>
+   <div class="diff-card-desc">${d.desc}</div>
+  </div>`;
+ }).join('');
+
+ let tabContent='';
+ if(settingsTab==='diff'){
+  tabContent=`<div class="cfg-panel">
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">PRESET SELECTION</span><span class="cfg-sub">Difficulty calibration</span></div>
+    ${cfgSeg('difficulty',[['story','STORY'],['survivor','SURVIVOR'],['nightmare','NIGHTMARE']])}
+   </div>
+   <div class="diff-cards" style="margin:4px 0">${diffCards}</div>
+   ${inGame?'<div style="font-size:11px;color:#ff6a6a;letter-spacing:1px;margin-top:2px">* Difficulty changes take effect on next deployment</div>':''}
+  </div>`;
+ } else if(settingsTab==='gfx'){
+  tabContent=`<div class="cfg-panel">
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">PALETTE THEME</span><span class="cfg-sub">Atmospheric lighting tint</span></div>
+    ${cfgSeg('theme',Object.keys(th).map(k=>[k,th[k].name]))}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">RENDER QUALITY</span><span class="cfg-sub">Lighting and shadow precision</span></div>
+    ${cfgSeg('gfx',[['low','LOW'],['medium','MEDIUM'],['high','HIGH']])}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">BRIGHTNESS</span><span class="cfg-sub">Ambient exposure</span></div>
+    ${cfgSeg('bright',[['dim','DIM'],['normal','NORMAL'],['bright','BRIGHT']])}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">CAMERA ZOOM (${zoomPct})</span><span class="cfg-sub">Isometric viewport scale</span></div>
+    ${cfgSeg('zoom',[[.85,'FAR (85%)'],[1,'NORMAL (100%)'],[1.2,'CLOSE (120%)']])}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">DYNAMIC LIGHTING</span><span class="cfg-sub">Real-time point lights & flashlight</span></div>
+    ${cfgOnOff('lighting')}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">FILM GRAIN</span><span class="cfg-sub">Cinematic noise overlay</span></div>
+    ${cfgOnOff('grain')}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">WEATHER & ASH</span><span class="cfg-sub">Atmospheric rain and particulate</span></div>
+    ${cfgOnOff('weather')}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">SPORE PARTICLES</span><span class="cfg-sub">Bio-decay drifting motes</span></div>
+    ${cfgOnOff('particles')}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">SCREEN SHAKE</span><span class="cfg-sub">Impact & explosive camera kick</span></div>
+    ${cfgOnOff('shake')}
+   </div>
+  </div>`;
+ } else if(settingsTab==='audio'){
+  tabContent=`<div class="cfg-panel">
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">MASTER AUDIO</span><span class="cfg-sub">Synthesized horror soundscapes</span></div>
+    ${cfgSeg('volume',[[0,'MUTE'],[.3,'30%'],[.6,'60%'],[1,'100%']])}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">AUTO-AIM ASSIST</span><span class="cfg-sub">Locks onto nearby threats</span></div>
+    ${cfgOnOff('assist')}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">ENEMY VITALITY BARS</span><span class="cfg-sub">Tactical health indicators</span></div>
+    ${cfgOnOff('bars')}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">RADAR MINIMAP</span><span class="cfg-sub">Top-down biometric radar</span></div>
+    ${cfgOnOff('minimap')}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">CINEMATIC SUBTITLES</span><span class="cfg-sub">Dialogue and radio logs</span></div>
+    ${cfgOnOff('subs')}
+   </div>
+  </div>`;
+ } else {
+  tabContent=`<div class="cfg-panel">
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">HIGH CONTRAST MODE</span><span class="cfg-sub">Enhanced visibility for floor tiles</span></div>
+    ${cfgOnOff('accessibility')}
+   </div>
+   <div class="cfg-row">
+    <div class="cfg-label"><span class="cfg-title">REDUCED MOTION</span><span class="cfg-sub">Suppresses screen tremors and rapid flashes</span></div>
+    ${cfgOnOff('reducedMotion')}
+   </div>
+  </div>`;
+ }
+
+ showOv(`<div class="cfg-shell">
+  <div class="ttl" style="font-size:36px;letter-spacing:6px">CONFIGURATION</div>
+  <div class="sub">SURVIVAL PROTOCOLS &amp; HARDWARE</div>
+  <div class="cfg-tabs">
+   <button class="cfg-tab ${settingsTab==='diff'?'active':''}" onclick="setTab('diff')">01. DIFFICULTY</button>
+   <button class="cfg-tab ${settingsTab==='gfx'?'active':''}" onclick="setTab('gfx')">02. GRAPHICS</button>
+   <button class="cfg-tab ${settingsTab==='audio'?'active':''}" onclick="setTab('audio')">03. AUDIO &amp; HUD</button>
+   <button class="cfg-tab ${settingsTab==='access'?'active':''}" onclick="setTab('access')">04. ACCESSIBILITY</button>
+  </div>
+  ${tabContent}
+  <div class="row" style="margin-top:16px;gap:12px">
+   <button class="btn reset-btn" onclick="Object.assign(S,DEF);saveS();applyTheme();if(typeof setVol==='function')setVol();showSettings()">\u21bb RESET TO DEFAULTS</button>
+   <button class="btn" onclick="${settingsBack==='pause'?'showPause()':'showMenu()'}">\u2190 RETURN</button>
+  </div>
+ </div>`,'menu');
+}
 function showControls(){showOv(`<div class="ttl" style="font-size:34px">HOW TO PLAY</div><div class="sub">PROTECT NANCY \u2014 SURVIVE THE BLOOM</div>
  <div class="kv"><b>WASD / ARROWS</b><span>Move (screen-relative)</span><b>SPACE</b><span>Attack \u2014 auto-aims at nearby enemies (hold to keep swinging)</span><b>MOUSE CLICK</b><span>Attack toward the cursor</span><b>SHIFT</b><span>Sprint (uses stamina, makes noise)</span><b>F</b><span>Dodge roll (brief invulnerability)</span><b>R</b><span>Parry \u2014 time it against an incoming swing</span><b>Q</b><span>Use a medkit \u2014 heals you, or Nancy if she is hurt and close</span><b>E</b><span>Carry / put down Nancy (she is safe, but you cannot attack)</span><b>M</b><span>Big map</span><b>P / ESC</b><span>Pause</span></div>
  <div class="txt" style="font-size:14px">Enemies notice noise and movement. Stand still to be harder to spot. Bloated infected explode when killed \u2014 back away. Glowing bloom patches raise your infection; antidotes lower it. If it gets too high, the ending changes.</div>
  <div class="txt" style="font-size:13px;color:#7dffb0">Halo rings on the ground show who is who: <b style="color:#3aff70">green</b> is healthy, <b style="color:#ffd34d">yellow</b> to <b style="color:#ff8a3a">orange</b> is rising infection, <b style="color:#ff4040">red</b> is infected, <b style="color:#c040ff">violet</b> is Maya.</div>
  <div class="row"><button class="btn" onclick="showMenu()">\u2190 BACK</button></div>`,'menu');}
+const CHAPTER_DESC=[
+ 'Defend your home against the first infected wave.',
+ 'Face Maya — the woman you loved, now consumed by The Bloom.',
+ 'Escape through the abandoned highway. Rain. Wreckage. Drifters.',
+ 'Hold the school shelter while Nancy hides. Sixty seconds of hell.',
+ 'Reach the bunker before the bombing begins. The final sprint.'
+];
 function showChapters(){const n=['HOME DEFENSE','THE BLOOM-WIFE','THE ROAD','SCHOOL SHELTER','FINAL ESCAPE'];
- showOv(`<div class="ttl" style="font-size:34px">CHAPTERS</div><div class="sub">COMPLETED CHAPTERS UNLOCK</div>${n.map((x,i)=>`<button class="btn ${i<=unlocked?'':'off'}" onclick="chapter(${i})">${i+1}. ${x}</button>`).join('')}<div class="row"><button class="btn" onclick="showMenu()">\u2190 BACK</button></div>`,'menu');}
+ const cards=n.map((x,i)=>{
+  const isUnlocked=i<=unlocked;
+  const rawB=(typeof bloomScores!=='undefined'&&bloomScores)?bloomScores[i]:null;
+  const best=(typeof rawB==='object'&&rawB!==null)?rawB.score:(rawB||(typeof bloomBst!=='undefined'?bloomBst[i]:null));
+  const diffKey=(typeof rawB==='object'&&rawB!==null&&rawB.diff)?rawB.diff:((i<unlocked||best)?S.difficulty:null);
+  return `<div class="chapter-card ${isUnlocked?'':'chapter-locked'}" ${isUnlocked?`onclick="chapter(${i})" role="button" tabindex="0"`:''}>
+   <div class="chapter-card-inner">
+    <div class="chapter-thumb" style="background-image:url('assets/art/chapter${i+1}.jpg');">
+     ${!isUnlocked?'<div class="chapter-thumb-lock">&#128274;</div>':''}
+    </div>
+    <div class="chapter-info">
+     <div class="chapter-card-top">
+      <div class="chapter-title"><span class="chapter-num">${i+1}.</span> ${x}</div>
+      <div class="chapter-meta">
+       ${!isUnlocked?'<span class="chapter-lock">&#128274; LOCKED</span>':`
+        ${best?`<span class="chapter-score">&#9733; BEST: ${best}</span>`:''}
+        ${diffKey?`<span class="diff-badge ${diffKey}">${DIFFS[diffKey]?.name||diffKey.toUpperCase()}</span>`:''}
+       `}
+      </div>
+     </div>
+     <div class="chapter-desc">${CHAPTER_DESC[i]}</div>
+    </div>
+   </div>
+  </div>`;
+ }).join('');
+ showOv(`<div class="ttl" style="font-size:34px">CHAPTERS</div><div class="sub">SELECT A CHAPTER TO BEGIN</div><div class="chapter-list">${cards}</div><div class="row" style="margin-top:16px"><button class="btn" onclick="showMenu()">\u2190 BACK</button></div>`,'menu');}
 function chapter(i){G=newGame();G.level=i;showIntro(i);}
 function showMenu(){applyTheme();settingsBack='menu';state='menu';LV=null;$('hud').style.display='none';applyTheme();
- showOv(`<div class="menu-bg" aria-hidden="true"><div class="menu-moon"></div><div class="menu-horizon"></div><div class="menu-house"><i></i><b></b><em></em></div><div class="menu-water"></div></div>
- <div class="menu-shell">
+ const contCh=Math.min(unlocked,4);
+ showOv(`<div class="menu-shell">
   <img class="brand-logo" src="logo.svg" alt="THE BLOOM">
   <div class="menu-rule"></div>
   <div class="sub">SURVIVAL HORROR</div>
+  <div class="menu-tagline">"A father. A daughter. A world consumed."</div>
   <div class="menu-actions">
+   ${unlocked>0?`<button class="btn continue-btn" onclick="chapter(${contCh})">CONTINUE</button>`:''}
    <button class="btn" onclick="newRun()">NEW GAME</button>
    <button class="btn" onclick="showChapters()">CHAPTERS</button>
    <button class="btn" onclick="settingsBack='menu';showSettings()">SETTINGS</button>
    <button class="btn" onclick="showControls()">CONTROLS</button>
   </div>
   <div class="txt menu-quote">"The horror is not the monsters.<br>It is watching the world decay while you try to keep one person safe."</div>
-  <div class="menu-version">THE BLOOM \u2014 2000s SURVIVAL HORROR</div>
- </div>`);}
+  <div class="menu-version">THE BLOOM \u2014 2000s SURVIVAL HORROR &nbsp;&bull;&nbsp; <span class="diff-badge ${S.difficulty}">${DIFFS[S.difficulty].name}</span></div>
+ </div>`,'menu');}
 function newRun(){G=newGame();showIntro(0);}
 let introIdx=0;
 function showIntro(i){introIdx=i;state='intro';const I=INTRO[i];$('hud').style.display='none';

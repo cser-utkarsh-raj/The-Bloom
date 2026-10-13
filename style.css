@@ -1,0 +1,304 @@
+/* THE BLOOM - Professional Cinematic Styles */
+@font-face {
+    font-family: 'Gothica';
+    src: url('/assets/fonts/Gothica-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Myolin';
+    src: url('/assets/fonts/Myolin Demo.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: #050505;
+    overflow: hidden;
+    font-family: 'Gothica', 'Myolin', 'Inter', 'Cinzel', system-ui, -apple-system, sans-serif;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+}
+
+/* ============================================
+   PREMIUM LOADING SCREEN
+   ============================================ */
+
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #030303;
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    backdrop-filter: blur(0px);
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(5,5,5,0) 0%, rgba(5,5,5,0.8) 100%);
+    pointer-events: none;
+}
+
+.loading-container {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* Logo */
+.loading-logo {
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.loading-logo-symbol {
+    font-size: clamp(32px, 8vw, 64px);
+    animation: pulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(201,160,61,0.3));
+}
+
+.loading-logo-text {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 7vw, 56px);
+    font-weight: 700;
+    letter-spacing: 8px;
+    background: linear-gradient(135deg, #c9a03d 0%, #e8d5a3 50%, #c9a03d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 30px rgba(201,160,61,0.2);
+}
+
+/* Progress Bar */
+.loading-progress-wrapper {
+    margin: 2rem 0;
+}
+
+.loading-bar {
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #c9a03d, #ffd966, #c9a03d);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 0 10px rgba(201,160,61,0.5);
+}
+
+.loading-percentage {
+    font-family: 'Inter', monospace;
+    font-size: 12px;
+    color: #c9a03d;
+    letter-spacing: 2px;
+    margin-top: 0.75rem;
+    opacity: 0.7;
+}
+
+/* Loading Message */
+.loading-message {
+    margin: 2rem 0 1rem;
+}
+
+.loading-message-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(10px, 3vw, 12px);
+    color: #8f8f8f;
+    letter-spacing: 4px;
+    font-weight: 300;
+}
+
+.loading-dots {
+    display: inline-block;
+    margin-left: 0.5rem;
+    animation: blink 1.5s step-end infinite;
+    color: #c9a03d;
+}
+
+/* Tips */
+.loading-tip {
+    margin-top: 3rem;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+}
+
+.loading-tip span {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: #6f6f6f;
+    letter-spacing: 2px;
+}
+
+/* Animated Spores Background */
+.loading-spores {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.spore {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(201,160,61,0.3);
+    border-radius: 50%;
+    animation: floatUp 8s infinite linear;
+}
+
+.spore:nth-child(1) { left: 10%; animation-duration: 12s; animation-delay: 0s; width: 6px; height: 6px; background: rgba(255,107,138,0.2); }
+.spore:nth-child(2) { left: 25%; animation-duration: 15s; animation-delay: 2s; width: 3px; height: 3px; }
+.spore:nth-child(3) { left: 45%; animation-duration: 10s; animation-delay: 1s; width: 5px; height: 5px; background: rgba(74,107,58,0.25); }
+.spore:nth-child(4) { left: 70%; animation-duration: 18s; animation-delay: 3s; width: 4px; height: 4px; }
+.spore:nth-child(5) { left: 85%; animation-duration: 13s; animation-delay: 0.5s; width: 7px; height: 7px; background: rgba(201,160,61,0.2); }
+
+/* Game Container */
+#game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#game-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+    z-index: 2; /* Sits directly over canvas */
+}
+
+canvas {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* Hide loading screen when faded out */
+#loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(100vh) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.5;
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(-100px) translateX(50px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .loading-logo-text {
+        letter-spacing: 4px;
+    }
+    
+    .loading-message-text {
+        letter-spacing: 2px;
+    }
+    
+    .loading-bar {
+        height: 1px;
+    }
+}
+
+/* Dark mode optimization */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #030303;
+    }
+}
+
+/* Prevent scrollbars on any resolution */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Performance */
+.loading-bar-fill, .loading-logo-symbol, .spore {
+    will-change: transform, width, opacity;
+}
+

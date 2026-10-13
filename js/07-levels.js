@@ -35,16 +35,17 @@ function buildL1(){
  return L;
 }
 function buildL2(){
- const L=new Level(1,30,24,'dark'),D=DIFFS[S.difficulty];L.dark=.7;L.flicker=true;L.amb=[18,3,6];L.ui='#d8735f';
+ const L=new Level(1,30,24,'dark'),D=DIFFS[S.difficulty];L.dark=.65;L.flicker=true;L.amb=[12,10,24];L.ui='#c870ff';
  L.fl('dark',2,2,15,22);L.fl('carpet',15,2,28,22);
- L.decal({t:'rug',x:5,y:14,w:5,d:4,c1:'#3a1a3a',c2:'#4a2a4a'});L.decal({t:'bloom',x:20,y:13,r:3.2});L.decal({t:'bloom',x:6,y:7,r:2});L.decal({t:'bloom',x:24,y:19,r:2});
+ L.decal({t:'rug',x:5,y:14,w:5,d:4,c1:'#2a1030',c2:'#3a1840'});
+ L.decal({t:'bloom',x:22,y:11,r:4.2});L.decal({t:'bloom',x:15,y:11,r:2.8});L.decal({t:'bloom',x:20,y:13,r:3.2});L.decal({t:'bloom',x:6,y:7,r:2.2});L.decal({t:'bloom',x:24,y:19,r:2.2});
  const WC='#4a4050';L.wH(2,28,2,{col:WC,win:5});L.wH(2,28,22,{col:WC});L.wV(2,22,2,{col:WC,win:4});L.wV(2,22,28,{col:WC,win:4});L.wV(2,9.5,15,{col:WC});L.wV(14.5,22,15,{col:WC});
  for(const[x,y]of[[8,8],[8,15],[22,8],[22,15]])L.add('pillar',x,y);
  L.add('shelf',3.5,2.4);L.add('tv',6,2.4,{dead:false});L.add('sofa',4,11.5,{r:1,back:'s'});L.add('table',9.5,11,{w:1.4,d:.8,r:1});L.add('chair',11,5);L.add('chair',5.5,18.5);L.add('lamp',13.5,2.6);
  L.add('bed',23,2.4,{col:'#5a2f5f'});L.add('nstand',21.9,2.4);L.add('wardrobe',17,2.4);L.add('crate',26,19);L.add('plant',17,20);L.add('counter',19.5,2.4,{w:1.4,d:.6,col:'#4a3a30'});
- L.add('growth',3,19);L.add('growth',26,4.5);L.add('growth',15.4,19.5);L.add('growth',4,4);
+ L.add('growth',22,11);L.add('growth',20.5,9.5);L.add('growth',23.5,12.5);L.add('growth',3,19);L.add('growth',26,4.5);L.add('growth',15.4,19.5);L.add('growth',4,4);
  L.spawn=[[4,20],[26,20],[26,4],[4,4]];
- L.pickup('med',20,20);L.pickup('med',4,3.5);L.pickup('anti',26.5,12);L.pickup('note',12,20,'A framed photo from the beach — Maya, David, little Nancy. The crack in the glass runs straight across Maya\'s face.');
+ L.pickup('med',20,20);L.pickup('med',4,3.5);L.pickup('anti',26.5,12);L.pickup('note',8,17,'A shattered framed photo from the beach — Maya, David, little Nancy. The crack in the glass runs straight across Maya\'s smiling face.');
  L.finish();L.start(6,18,5,19.3);
  const boss=new Enemy(L,'boss',22,11);L.boss=boss;L.enemies.push(boss);let intro=3.5,addT=12;
  L.bossPhase=ph=>{shake(16);SFX.roar();say(ph===2?'"Run, David… I can\'t… hold it…"':'"Nancy… my baby…"',3500,'#d68cff');banner(ph===2?'SHE CHARGES':'SHE SCREAMS','#d68cff');for(let i=0;i<2;i++){const s=L.farSpawn(10);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}};
@@ -82,7 +83,7 @@ function buildL3(){
  L.decal({t:'bloom',x:19,y:46,r:2.4});L.decal({t:'bloom',x:15,y:96,r:2});L.decal({t:'bloom',x:22,y:30,r:2.2});L.decal({t:'bloom',x:17,y:112,r:1.8});
  L.goal={x:19,y:7,r:3.2};L.add('car',13.5,5,{col:'#3a5a3a'});L.add('car',23.5,5,{col:'#3a5a3a'});
  const groups=[[120,2],[110,3],[98,3],[86,3],[72,3],[58,4],[46,3],[34,3],[24,2]];
- L.finish();L.start(19,126,20.3,127);
+ L.finish();L.start(19,126,18.2,126);
  groups.forEach(([y,n],gi)=>{for(let i=0;i<n;i++){const[x,yy]=L.freeSpot(13,25,y-3,y+3,.7);const t=gi===3&&i===0?'stalker':gi===5&&i===0?'bloated':(gi>=6&&i===2)?'stalker':'drifter';L.spawnEnemy(t,x,yy,{pr:4});}});
  L.spawn=[[19,60]];
  L.pickup('med',16,112);L.pickup('med',32,62);L.pickup('med',21,26);L.pickup('anti',20,80);L.pickup('note',16,122,'A radio, still warm: "…all survivors, the evacuation point is north of the highway. Do not stop for anyone. We repeat — do not stop."');L.pickup('note',33,44,'A note taped to the shutters: "CLOSED. They came out of the water. My son is on the second floor. Please, somebody read this."');
