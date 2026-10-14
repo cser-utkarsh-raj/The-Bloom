@@ -17,8 +17,7 @@ function getSeed(){if(GLOBAL_SEED!==null)return GLOBAL_SEED;const urlParams=new 
 const cv=$('c'),cx=cv.getContext('2d');
 const lc=document.createElement('canvas'),lx=lc.getContext('2d');
 let W=innerWidth,H=innerHeight,DPR=1,Z=1;
-function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';lc.width=Math.max(2,W>>1);lc.height=Math.max(2,H>>1);const oc=$('oc');oc.width=W;oc.height=H;}
-addEventListener('resize',resize);
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';lc.width=Math.max(2,W>>1);lc.height=Math.max(2,H>>1);const oc=$('oc');oc.width=W;oc.height=H;}addEventListener('resize',resize);
 
 /* ---------- settings ---------- */
 const DEF={difficulty:'survivor',theme:'bloom',gfx:'high',bright:'normal',zoom:1,particles:true,shake:true,grain:true,lighting:true,weather:true,minimap:true,subs:true,assist:true,bars:true,volume:.6,accessibility:false,reducedMotion:false};
@@ -57,38 +56,53 @@ function setVol(){if(MG)MG.gain.value=S.volume;}
 function tone(f,dur,type,vol,slide){if(!AC)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,f+slide),t+dur);g.gain.setValueAtTime(vol||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(MG);o.start(t);o.stop(t+dur+.02);}
 function nz(dur,vol,fq){if(!AC)return;const t=AC.currentTime,s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;f.type='bandpass';f.frequency.value=fq||1000;g.gain.setValueAtTime(vol||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(MG);s.start(t,Math.random()*.5,dur);}
 const SFX={swing:()=>nz(.12,.1,2500),hit:()=>{tone(130,.14,'square',.1,-70);nz(.1,.12,700);},hurt:()=>tone(95,.28,'sawtooth',.18,-45),kill:()=>nz(.2,.12,400),heal:()=>tone(520,.2,'sine',.12,260),pick:()=>tone(760,.12,'triangle',.1,300),boom:()=>{nz(.8,.35,150);tone(60,.8,'sine',.3,-30);},roar:()=>tone(110,.9,'sawtooth',.16,-60),shell:()=>tone(900,.8,'sine',.05,-700),shot:()=>{nz(.12,.2,1800);tone(300,.1,'square',.08,-200);}};
-/* Original adaptive score synthesized locally with Web Audio; no external music files. */
+/* ---------- adaptive soundtrack (Web Audio, fully local) ---------- */
 const MUSIC={level:-1,step:0,pads:[],timer:null};
 function startMusicForLevel(level){
- audioInit();if(!AC||!MG)return;MUSIC.level=level;MUSIC.step=0;
- const roots=[55,49,52,46,41],root=roots[clamp(level|0,0,4)];
+ audioInit();if(!AC||!MG)return;
+ MUSIC.level=clamp(level|0,0,4);MUSIC.step=0;
+ const roots=[55,49,52,46,41],root=roots[MUSIC.level];
  if(!MUSIC.pads.length){
-  for(const [ratio,type,gain] of [[1,'triangle',.024],[1.498,'sine',.012],[2.002,'sine',.006]]){
-   const o=AC.createOscillator(),g=AC.createGain(),filter=AC.createBiquadFilter();o.type=type;o.frequency.value=55*ratio;filter.type='lowpass';filter.frequency.value=460;g.gain.value=.0001;o.connect(filter);filter.connect(g);g.connect(MG);o.start();MUSIC.pads.push({o,g,filter,ratio,maxGain:gain});
+  for(const[ratio,type,gain] of [[1,'triangle',.075],[1.4983,'sine',.042],[2.0,'sine',.02]]){
+   const o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();
+   o.type=type;o.frequency.value=root*ratio;o.detune.value=ratio===1?0:Math.random()*8-4;
+   f.type='lowpass';f.frequency.value=520;f.Q.value=.7;
+   g.gain.value=.0001;o.connect(f);f.connect(g);g.connect(MG);o.start();
+   MUSIC.pads.push({o,g,f,ratio,maxGain:gain});
   }
   MUSIC.timer=setInterval(()=>{
    if(!AC||!MG)return;
-   const playing=state==='play',base=roots[clamp(MUSIC.level|0,0,4)];
-   for(const p of MUSIC.pads){p.o.frequency.setTargetAtTime(base*p.ratio,AC.currentTime,.8);p.g.gain.setTargetAtTime(playing?p.maxGain:.0001,AC.currentTime,playing?1.8:.35);}
-   if(playing&&S.volume>.001){const scales=[[0,3,7,10,7,5,3,2],[0,3,5,7,10,7,5,2],[0,2,5,7,9,7,5,2],[0,3,7,8,10,8,7,3],[0,3,5,7,10,8,7,2]][clamp(MUSIC.level|0,0,4)];const n=scales[MUSIC.step%scales.length],octave=MUSIC.step%4===0?2:1;tone(base*Math.pow(2,n/12)*octave,1.35,'sine',MUSIC.level===1?.042:.027,-2);if(MUSIC.step%4===0)tone(base*2,.8,'triangle',.018,1);MUSIC.step++;}
+   const playing=state==='play',base=roots[clamp(MUSIC.level,0,4)];
+   const infect=(typeof G!=='undefined'&&G)?clamp(G.infect||0,0,100):0;
+   for(const p of MUSIC.pads){
+    p.o.frequency.setTargetAtTime(base*p.ratio,AC.currentTime,.8);
+    p.f.frequency.setTargetAtTime(playing?(480+infect*10):300,AC.currentTime,1.5);
+    p.g.gain.setTargetAtTime(playing?p.maxGain:.0001,AC.currentTime,playing?1.2:.3);
+   }
+   if(playing&&S.volume>.001){
+    const scales=[[0,3,7,10,7,5,3,2],[0,3,5,7,10,7,5,2],[0,2,5,7,9,7,5,2],[0,3,7,8,10,8,7,3],[0,3,5,7,10,8,7,2]];
+    const n=scales[MUSIC.level][MUSIC.step%scales[MUSIC.level].length],oct=MUSIC.step%4===0?2:1;
+    tone(base*Math.pow(2,n/12)*oct,1.35,'sine',MUSIC.level===1?.06:.045,-2);
+    if(MUSIC.step%4===0)tone(base*2,.8,'triangle',.03,1);
+    if(MUSIC.step%8===4)tone(base*Math.pow(2,(n+7)/12),1.1,'sine',.02,-2);
+    if(infect>55&&MUSIC.step%2===0)tone(base/2,.25,'sine',.05,-8);
+    MUSIC.step++;
+   }
   },1450);
  }
- for(const p of MUSIC.pads){p.o.frequency.setTargetAtTime(root*p.ratio,AC.currentTime,1.2);}
+ /* immediate retune + fast fade-in so the score is audible the moment a chapter begins */
+ for(const p of MUSIC.pads){
+  p.o.frequency.setTargetAtTime(root*p.ratio,AC.currentTime,.6);
+  p.g.gain.setTargetAtTime(state==='play'?p.maxGain:.0001,AC.currentTime,.5);
+ }
 }
-
 /* ---------- input ---------- */
 const keys={},hit={},mouse={x:0,y:0,down:false,click:false};
-const took=c=>{const v=hit[c];hit[c]=false;return !!v;};
-addEventListener('keydown',e=>{if(!e.repeat)hit[e.code]=true;keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab'].includes(e.code))e.preventDefault();audioInit();
+const took=c=>{const v=hit[c];hit[c]=false;return !!v;};addEventListener('keydown',e=>{if(!e.repeat)hit[e.code]=true;keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Tab'].includes(e.code))e.preventDefault();audioInit();
  if(state==='play'){if(e.code==='Escape'||e.code==='KeyP')showPause();if(e.code==='KeyM')mapBig=!mapBig;if(e.code==='KeyH')toggleHelp();}
  else if(state==='pause'&&(e.code==='Escape'||e.code==='KeyP'))resume();
- else if(state==='intro'&&(e.code==='Space'||e.code==='Enter'))introGo();});
-addEventListener('keyup',e=>keys[e.code]=false);
-addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
-cv.addEventListener('mousedown',e=>{if(e.button===0){mouse.down=true;mouse.click=true;}mouse.x=e.clientX;mouse.y=e.clientY;audioInit();});
-addEventListener('mouseup',()=>mouse.down=false);
-addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
-addEventListener('contextmenu',e=>e.preventDefault());
+ else if(state==='intro'&&(e.code==='Space'||e.code===
+'Enter'))introGo();});addEventListener('keyup',e=>keys[e.code]=false);addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});cv.addEventListener('mousedown',e=>{if(e.button===0){mouse.down=true;mouse.click=true;}mouse.x=e.clientX;mouse.y=e.clientY;audioInit();});addEventListener('mouseup',()=>mouse.down=false);addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});addEventListener('contextmenu',e=>e.preventDefault());
 
 /* ---------- isometric math ---------- */
 const TW=64,ZH=32;
