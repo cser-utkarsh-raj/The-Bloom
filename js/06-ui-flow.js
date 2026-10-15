@@ -24,14 +24,18 @@ function getSceneImg(type) {
   if (!SCENE_IMGS[src]) {
     const img = new Image();
     img.loaded = false;
+    img.failed = false;
     img._bloomAssetFallbackTried = false;
-    img.onload = () => { img.loaded = true; };
+    img.onload = () => { img.loaded = true; img.failed = false; };
     img.onerror = () => {
       // Vite serves public/assets/* as /assets/*; direct-root hosting keeps
       // the files under /public/assets/*. Retry the alternate valid location.
       if (!img._bloomAssetFallbackTried && src.startsWith('assets/')) {
         img._bloomAssetFallbackTried = true;
         img.src = 'public/' + src;
+      } else {
+        img.failed = true;
+        console.warn('[THE BLOOM] Scene image failed to load:', img.src);
       }
     };
     img.src = src;
