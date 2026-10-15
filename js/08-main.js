@@ -8,7 +8,7 @@ function frame(now){
  else if(!ovAnim){setScreen();cx.fillStyle='#03070a';cx.fillRect(0,0,W,H);}
  // Keep the boot shield over the canvas until the actual menu image has been drawn.
  // This prevents the procedural fallback/old canvas state flashing during asset loading.
- if(!bootShieldReleased&&state==='menu'){
+ if(!bootShieldReleased){
   const menuImage=typeof getSceneImg==='function'?getSceneImg('menu'):null;
   if((menuImage&&(menuImage.loaded||menuImage.failed))||now-bootStarted>5000){
    bootShieldReleased=true;const shield=$('boot-shield');if(shield)shield.classList.add('boot-ready');
