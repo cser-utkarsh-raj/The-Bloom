@@ -4,8 +4,9 @@ function frame(now){
  requestAnimationFrame(frame);if(!bootStarted)bootStarted=now;const dt=Math.min(.05,((now-last)/1000)||0);last=now;
  if(ovAnim)ovAnim(now/1000);
  if(state==='play'&&LV){LV.update(dt);hud(LV);if(helpShown>0&&helpShown<99){helpShown-=dt;if(helpShown<=0)$('help').style.opacity=0;}}
- if(LV&&(state==='play'||state==='pause'||state==='over')){LV.draw();if(typeof drawAtmosphereOverlay==='function')drawAtmosphereOverlay(now,dt);}
+ if(LV&&(state==='play'||state==='pause'||state==='over'))LV.draw();
  else if(!ovAnim){setScreen();cx.fillStyle='#03070a';cx.fillRect(0,0,W,H);}
+ if(typeof drawAtmosphereOverlay==='function')drawAtmosphereOverlay(now,dt);
  // Keep the boot shield over the canvas until the actual menu image has been drawn.
  // This prevents the procedural fallback/old canvas state flashing during asset loading.
  if(!bootShieldReleased){
