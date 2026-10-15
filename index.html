@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Share+Tech+Mono&family=Special+Elite&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261014-sunflower">
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261014-story-music">
+<link rel="stylesheet" href="css/style.css?v=20261015-p5-atmosphere">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261015-p5-atmosphere">
 <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -32,14 +32,16 @@
 </div>
 <div id="ov"><canvas id="oc"></canvas><div id="pn"></div></div>
 <script>
-// Clear old cache and unregister service workers to guarantee latest assets
+// Retire the legacy PWA cache that could serve the old game for one navigation.
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     for (const reg of regs) reg.unregister();
-  });
+  }).catch(() => {});
 }
 if ('caches' in window) {
-  caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key))));
+  caches.keys().then(keys => Promise.all(
+    keys.filter(key => /^bloom-/i.test(key)).map(key => caches.delete(key))
+  )).catch(() => {});
 }
 </script>
 <script src="js/01-core.js?v=20261014-musicfix"></script>
@@ -47,17 +49,18 @@ if ('caches' in window) {
 <script src="js/03-level-engine.js?v=20261013-fresh2"></script>
 <script src="js/04-entities.js?v=20261013-fresh2"></script>
 <script src="js/05-game-state.js?v=20261014-story-music"></script>
-<script src="js/06-ui-flow.js?v=20261014-story-music"></script>
+<script src="js/06-ui-flow.js?v=20261015-asset-ready"></script>
 <script src="js/07-levels.js?v=20261014-story-music"></script>
 <script src="js/09-enhancements.js?v=20261013-fresh2"></script>
 <script src="js/15-boss-visuals.js?v=20261015-visualpass"></script>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
 <script src="js/10-combat.js?v=20261013-fresh2"></script>
 <script src="js/11-visuals.js?v=20261013-fresh2"></script>
 <script src="js/12-mobile.js?v=20261013-fresh2"></script>
 <script src="js/13-world-detail.js?v=20261013-fresh2"></script>
 <script src="js/14-city-gameplay.js?v=20261013-fresh2"></script>
-<script src="js/16-atmosphere.js?v=20261015-visualpass"></script>
+<script src="js/16-atmosphere.js?v=20261015-p5-atmosphere"></script>
 <script src="js/17-cinematics.js?v=20261015-visualpass"></script>
-<script src="js/08-main.js?v=20261015-visualpass"></script>
+<script src="js/08-main.js?v=20261015-asset-ready"></script>
 </body>
 </html>
