@@ -8,13 +8,13 @@
  let motes=[],rain=[];
  const clamp01=v=>Math.max(0,Math.min(1,v));
  function seedParticles(p){
-  const count=model.quality==='high'?68:model.quality==='medium'?34:0;
+  const count=model.quality==='high'?96:model.quality==='medium'?48:0;
   motes=Array.from({length:count},()=>({
-   x:p.random(p.width),y:p.random(p.height),r:p.random(.7,2.25),
+   x:p.random(p.width),y:p.random(p.height),r:p.random(1,2.8),
    vx:p.random(-7,7),vy:p.random(-20,-5),phase:p.random(Math.PI*2),
-   a:p.random(28,82),spore:p.random()<.24
+   a:p.random(38,104),spore:p.random()<.24
   }));
-  rain=Array.from({length:model.quality==='high'?120:65},()=>({
+  rain=Array.from({length:model.quality==='high'?160:80},()=>({
    x:p.random(p.width),y:p.random(p.height),speed:p.random(520,980),lean:p.random(-180,-95),alpha:p.random(18,56)
   }));
  }
@@ -54,7 +54,7 @@
      canvas.id('bloom-p5-atmosphere');
      canvas.style('position','fixed');canvas.style('left','0');canvas.style('top','0');
      canvas.style('pointer-events','none');canvas.style('z-index','4');
-     canvas.style('opacity','0.94');canvas.style('mix-blend-mode','screen');
+     canvas.style('opacity','0.98');canvas.style('mix-blend-mode','screen');
      p.clear();p.noLoop();seedParticles(p);
     };
     p.windowResized=function(){p.resizeCanvas(window.innerWidth,window.innerHeight);seedParticles(p);};
@@ -65,14 +65,14 @@
      const high=model.quality==='high',q=high?1:.64;
      const ctx=p.drawingContext;
      // Wide, soft teal haze gives the scene atmospheric depth without obscuring silhouettes.
-     ctx.save();ctx.globalCompositeOperation='screen';ctx.filter=high?'blur(26px)':'blur(18px)';
+     ctx.save();ctx.globalCompositeOperation='screen';ctx.filter=high?'blur(34px)':'blur(22px)';
      for(let i=0;i<4;i++){
       const drift=model.reduced?0:Math.sin(clock*.17+i*2.2)*p.width*.035;
       const x=p.width*(.18+i*.22)+drift;
       const y=p.height*(.58+(i%2)*.16)+Math.cos(clock*.12+i)*p.height*.025;
       const radius=p.height*(.18+(i%3)*.035);
       const g=ctx.createRadialGradient(x,y,2,x,y,radius);
-      g.addColorStop(0,i%2?'rgba(42,135,115,.075)':'rgba(75,125,155,.055)');
+      g.addColorStop(0,i%2?'rgba(42,155,125,.12)':'rgba(75,135,165,.085)');
       g.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=g;ctx.fillRect(x-radius,y-radius,radius*2,radius*2);
      }
