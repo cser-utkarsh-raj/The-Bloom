@@ -23,8 +23,8 @@ let T=0;
 /* ---------- humanoid ---------- */
 function human(x,y,o){
  const sc=o.sc||1,f=o.f||0,fx=Math.cos(f),fy=Math.sin(f),px=-fy,py=fx,ph=o.ph||0;
- const sw=Math.sin(ph)*.17*sc,z0=(o.z||0)+Math.abs(Math.sin(ph))*.03+Math.sin(T*2.2+(x*5.3+y*3.1))*.009*sc,F=o.fl,c=k=>F?'#ffffff':o[k];
- const up=o.up?.18:0,ar=(o.arms==='fwd'?.3:0),as=o.arms==='fwd'?0:Math.sin(ph)*.12*sc,P=[];
+ const gait=o.gait==null?1:clamp(o.gait,0,2),bob=o.bob==null?1:clamp(o.bob,0,2),armSwing=o.armSwing==null?1:clamp(o.armSwing,0,2);\n const sw=Math.sin(ph)*.17*sc*gait,z0=(o.z||0)+Math.abs(Math.sin(ph))*.03*bob+Math.sin(T*2.2+(x*5.3+y*3.1))*.009*sc,F=o.fl,c=k=>F?'#ffffff':o[k];
+ const up=o.up?.18:0,ar=(o.arms==='fwd'?.3:0),as=o.arms==='fwd'?0:Math.sin(ph)*.12*sc*armSwing,P=[];
  P.push([x+px*.1*sc+fx*sw,y+py*.1*sc+fy*sw,z0,.14*sc,.58*sc,c('pn')]);
  P.push([x-px*.1*sc-fx*sw,y-py*.1*sc-fy*sw,z0,.14*sc,.58*sc,c('pn')]);
  if(o.dress)P.push([x,y,z0+.3*sc,.4*sc,.34*sc,c('sh')]);
