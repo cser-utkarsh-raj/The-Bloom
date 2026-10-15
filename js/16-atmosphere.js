@@ -45,7 +45,7 @@
    // Low-health pressure is subtle and follows the existing health state only.
    const hp=G.hp/Math.max(1,G.maxHp);
    if(!reduced&&hp<.32){
-    const a=(.035+.045*(.5+.5*Math.sin(clock*4.2)))*((.32-hp)/.32);
+    const a=(.035+.045*(.5+.5*Math.sin(clock*4.2)))*clamp((.32-hp)/.32,0,1);
     const vg=cx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.78);
     vg.addColorStop(0,'rgba(70,0,8,0)');
     vg.addColorStop(1,'rgba(120,8,18,'+a+')');
