@@ -529,3 +529,8 @@ body.mobile .cfg-row{padding:8px 10px}
 #boot-shield img{display:block;width:min(420px,78vw);max-height:34vh;object-fit:contain;image-rendering:pixelated}
 #boot-shield span{font:10px 'Share Tech Mono','Courier New',monospace;letter-spacing:4px;color:#b9a05b;text-align:center}
 #boot-shield.boot-ready{opacity:0;visibility:hidden;pointer-events:none}
+
+/* p5.js visual layer: between scene art and interactive menu/HUD. */
+#ov #oc{z-index:0}
+#ov #bloom-p5-atmosphere{position:fixed!important;inset:0!important;z-index:2!important;pointer-events:none!important}
+#ov #pn{position:relative;z-index:3}
