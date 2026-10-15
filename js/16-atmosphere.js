@@ -125,7 +125,14 @@
   }
  }
  function drawAtmosphereOverlay(now,dt){
-  model.active=!!LV&&!!G&&['play','pause','over'].includes(state);
+  model.active=['play','pause','over','menu','intro','shop','settings','chapters','end','dead'].includes(state);
+  const overlay=$('ov');
+  if(sketch&&sketch.canvas&&overlay){
+   const inGame=!!LV&&['play','pause','over'].includes(state);
+   const parent=inGame?document.body:overlay;
+   if(sketch.canvas.parentNode!==parent)parent.appendChild(sketch.canvas);
+   sketch.canvas.style.zIndex=inGame?'4':'2';
+  }
   model.dt=dt||0;model.quality=S.gfx||'high';model.infect=G?G.infect||0:0;
   model.hp=G?G.hp/Math.max(1,G.maxHp):1;
   model.weather=!!(S.weather&&LV&&(LV.rain||LV.ash));model.ash=!!(LV&&LV.ash);
