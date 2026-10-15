@@ -1,12 +1,20 @@
 /* ---------- main loop ---------- */
-let last=0;
+let last=0,bootStarted=0,bootShieldReleased=false;
 function frame(now){
- requestAnimationFrame(frame);const dt=Math.min(.05,((now-last)/1000)||0);last=now;
+ requestAnimationFrame(frame);if(!bootStarted)bootStarted=now;const dt=Math.min(.05,((now-last)/1000)||0);last=now;
  if(ovAnim)ovAnim(now/1000);
  if(state==='play'&&LV){LV.update(dt);hud(LV);if(helpShown>0&&helpShown<99){helpShown-=dt;if(helpShown<=0)$('help').style.opacity=0;}}
  if(LV&&(state==='play'||state==='pause'||state==='over')){LV.draw();if(typeof drawAtmosphereOverlay==='function')drawAtmosphereOverlay(now,dt);}
  else if(!ovAnim){setScreen();cx.fillStyle='#03070a';cx.fillRect(0,0,W,H);}
+ // Keep the boot shield over the canvas until the actual menu image has been drawn.
+ // This prevents the procedural fallback/old canvas state flashing during asset loading.
+ if(!bootShieldReleased&&state==='menu'){
+  const menuImage=typeof getSceneImg==='function'?getSceneImg('menu'):null;
+  if((menuImage&&(menuImage.loaded||menuImage.failed))||now-bootStarted>5000){
+   bootShieldReleased=true;const shield=$('boot-shield');if(shield)shield.classList.add('boot-ready');
+  }
+ }
  for(const k in hit)hit[k]=false;mouse.click=false;
 }
-function boot(){resize();makeTextures();makeGrain();applyTheme();const cmd=new URLSearchParams(window.location.search).get('cmd');if(cmd==='chapters')showChapters();else if(cmd==='settings')showSettings();else showMenu();requestAnimationFrame(frame);const shield=document.getElementById('boot-shield');if(shield)requestAnimationFrame(()=>requestAnimationFrame(()=>shield.classList.add('boot-ready')));}
+function boot(){resize();makeTextures();makeGrain();applyTheme();const cmd=new URLSearchParams(window.location.search).get('cmd');if(cmd==='chapters')showChapters();else if(cmd==='settings')showSettings();else showMenu();requestAnimationFrame(frame);}
 boot();
