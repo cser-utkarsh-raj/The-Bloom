@@ -3,7 +3,7 @@
    The existing game loop calls redraw(); p5 never runs its own continuous loop. */
 (function(){
  'use strict';
- let sketch=null,clock=0,lastQuality='',fallbackWarned=false;
+ let sketch=null,overlayCanvas=null,clock=0,lastQuality='',fallbackWarned=false;
  const model={active:false,dt:0,quality:'high',weather:false,ash:false,infect:0,hp:1,theme:'#68d9a5',reduced:false};
  let motes=[],rain=[];
  const clamp01=v=>Math.max(0,Math.min(1,v));
@@ -51,7 +51,7 @@
     p.setup=function(){
      p.pixelDensity(1);
      canvas=p.createCanvas(window.innerWidth,window.innerHeight);
-     canvas.id('bloom-p5-atmosphere');
+     canvas.id('bloom-p5-atmosphere');overlayCanvas=canvas.elt;
      canvas.style('position','fixed');canvas.style('left','0');canvas.style('top','0');
      canvas.style('pointer-events','none');canvas.style('z-index','4');
      canvas.style('opacity','0.98');canvas.style('mix-blend-mode','screen');
@@ -127,11 +127,11 @@
  function drawAtmosphereOverlay(now,dt){
   model.active=['play','pause','over','menu','intro','shop','settings','chapters','end','dead'].includes(state);
   const overlay=$('ov');
-  if(sketch&&sketch.canvas&&overlay){
+  if(sketch&&overlayCanvas&&overlay){
    const inGame=!!LV&&['play','pause','over'].includes(state);
    const parent=inGame?document.body:overlay;
-   if(sketch.canvas.parentNode!==parent)parent.appendChild(sketch.canvas);
-   sketch.canvas.style.zIndex=inGame?'4':'2';
+   if(overlayCanvas.parentNode!==parent)parent.appendChild(overlayCanvas);
+   overlayCanvas.style.zIndex=inGame?'4':'2';
   }
   model.dt=dt||0;model.quality=S.gfx||'high';model.infect=G?G.infect||0:0;
   model.hp=G?G.hp/Math.max(1,G.maxHp):1;
