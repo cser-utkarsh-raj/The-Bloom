@@ -8,15 +8,15 @@ function showOv(html,scene){state=state==='play'?'pause':state;const o=$('ov');o
    ============================================================ */
 const SCENE_IMGS = {};
 const SCENE_SRCS = {
-  menu: 'assets/art/home_bg.png',
-  home: 'assets/art/chapter1.jpg',
-  wife: 'assets/art/chapter2.jpg',
-  road: 'assets/art/chapter3.jpg',
-  school: 'assets/art/chapter4.jpg',
-  bunker: 'assets/art/chapter5.jpg',
-  end: 'assets/art/chapter5.jpg',
-  dead: 'assets/art/chapter2.jpg',
-  shop: 'assets/art/home_bg.png'
+  menu: 'public/assets/art/home_bg.png',
+  home: 'public/assets/art/chapter1.jpg',
+  wife: 'public/assets/art/chapter2.jpg',
+  road: 'public/assets/art/chapter3.jpg',
+  school: 'public/assets/art/chapter4.jpg',
+  bunker: 'public/assets/art/chapter5.jpg',
+  end: 'public/assets/art/chapter5.jpg',
+  dead: 'public/assets/art/chapter2.jpg',
+  shop: 'public/assets/art/home_bg.png'
 };
 
 function getSceneImg(type) {
@@ -973,7 +973,7 @@ function showChapters(){const n=['Home Defence','The Face I Loved','Miles of Sil
   const diffKey=(typeof rawB==='object'&&rawB!==null&&rawB.diff)?rawB.diff:((i<unlocked||best)?S.difficulty:null);
   return `<div class="chapter-card ${isUnlocked?'':'chapter-locked'}" ${isUnlocked?`onclick="chapter(${i})" role="button" tabindex="0"`:''}>
    <div class="chapter-card-inner">
-    <div class="chapter-thumb" style="background-image:url('assets/art/chapter${i+1}.jpg'),url('public/assets/art/chapter${i+1}.jpg');background-size:cover,cover;background-position:center,center;">
+    <div class="chapter-thumb" style="background-image:url('public/assets/art/chapter${i+1}.jpg'),url('public/public/assets/art/chapter${i+1}.jpg');background-size:cover,cover;background-position:center,center;">
      ${!isUnlocked?'<div class="chapter-thumb-lock">&#128274;</div>':''}
     </div>
     <div class="chapter-info">

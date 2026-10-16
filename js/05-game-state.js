@@ -1,6 +1,6 @@
 /* ---------- game state & HUD ---------- */
 let G=null;// built in boot() after settings load, so difficulty medkits are correct
-function newGame(){return{score:0,hp:100,maxHp:100,meds:DIFFS[S.difficulty].med,infect:0,trust:100,dmgUp:0,level:0,bought:{},snap:null,kills:0,runKills:0,maxCombo:0};}
+function newGame(){return{score:0,honour:100,hp:100,maxHp:100,meds:DIFFS[S.difficulty].med,infect:0,trust:100,dmgUp:0,level:0,bought:{},snap:null,kills:0,runKills:0,maxCombo:0};}
 let bloomBst={};try{bloomBst=JSON.parse(localStorage.getItem('bloomBst')||'{}')||{};}catch(e){bloomBst={};}
 const saveBst=(i,s)=>{if((bloomBst[i]|0)>=s)return false;bloomBst[i]=s;try{localStorage.setItem('bloomBst',JSON.stringify(bloomBst));}catch(e){}return true;};
 let subTimer=0;
@@ -36,7 +36,7 @@ const INTRO=[
 function startLevel(i){
  G.level=i;const D=DIFFS[S.difficulty];
  G.hp=Math.min(G.maxHp,G.hp+(i>0?25:0));if(i===0&&!G.snap){G.hp=G.maxHp;}
- G.snap={hp:G.hp,meds:G.meds,infect:G.infect,score:G.score,trust:G.trust,kills:0,maxCombo:G.maxCombo||0};G.kills=0;
+ G.snap={hp:G.hp,meds:G.meds,infect:G.infect,score:G.score,honour:(G.honour!==undefined?G.honour:100),trust:G.trust,kills:0,maxCombo:G.maxCombo||0};G.kills=0;
  LV=BUILD[i]();state='play';mapBig=false;if(typeof startMusicForLevel==='function')startMusicForLevel(i);
  if(LV.ui)document.documentElement.style.setProperty('--acc',LV.ui);
  $('ov').style.display='none';$('hud').style.display='block';ovAnim=null;

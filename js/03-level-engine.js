@@ -121,9 +121,9 @@ class Level{
   for(const d of this.decals){
    if(d.t==='rug'){decalRect(d.x,d.y,d.w,d.d,d.c1,.95);decalRect(d.x+.25,d.y+.25,d.w-.5,d.d-.5,d.c2,.95);decalRect(d.x+.5,d.y+.5,d.w-1,d.d-1,d.c1,.6);}
    else if(d.t==='rect')decalRect(d.x,d.y,d.w,d.d,d.c,d.a);
-   else if(d.t==='bloom'){const pu=.5+.5*Math.sin(this.t*1.6+d.x);groundEll(d.x,d.y,d.r,rgba('#1affb0',.12+.08*pu),rgba('#4dffc8',.4),1,2);groundEll(d.x,d.y,d.r*.55,rgba('#7affd8',.1+.1*pu),null,1);
-    cx.strokeStyle='rgba(120,255,210,.35)';cx.lineWidth=1.5;for(let k=0;k<7;k++){const a=k*.9+d.x;cx.beginPath();cx.moveTo(isx(d.x,d.y),isy(d.x,d.y));cx.lineTo(isx(d.x+Math.cos(a)*d.r*.9,d.y+Math.sin(a)*d.r*.9),isy(d.x+Math.cos(a)*d.r*.9,d.y+Math.sin(a)*d.r*.9));cx.stroke();}
-    light(d.x,d.y,.2,d.r*1.5,.4,'#3affc0');}
+   else if(d.t==='bloom'){const pu=.5+.5*Math.sin(this.t*1.6+d.x);groundEll(d.x,d.y,d.r*.85,'rgba(20,12,24,.45)',null,.8);groundEll(d.x,d.y,d.r*.5,'rgba(10,25,18,.35)',rgba('#1f6b4d',.3+.15*pu),.8,1.2);
+    cx.strokeStyle='rgba(25,50,38,.45)';cx.lineWidth=1.2;for(let k=0;k<6;k++){const a=k*1.05+d.x;cx.beginPath();cx.moveTo(isx(d.x,d.y),isy(d.x,d.y));cx.lineTo(isx(d.x+Math.cos(a)*d.r*.7,d.y+Math.sin(a)*d.r*.7),isy(d.x+Math.cos(a)*d.r*.7,d.y+Math.sin(a)*d.r*.7));cx.stroke();}
+    light(d.x,d.y,.2,d.r*1.1,.25,'#1f8a5d');}
   }
   if(this.goal){const g=this.goal,pu=.5+.5*Math.sin(this.t*3);groundEll(g.x,g.y,g.r,rgba(THEMES[S.theme].acc,.1+.1*pu),THEMES[S.theme].acc,.8,3);const sx0=isx(g.x,g.y),sy0=isy(g.x,g.y);const gr=cx.createLinearGradient(0,sy0-260,0,sy0);gr.addColorStop(0,'rgba(120,255,190,0)');gr.addColorStop(1,'rgba(120,255,190,.28)');cx.fillStyle=gr;cx.fillRect(sx0-18,sy0-260,36,260);light(g.x,g.y,.5,g.r*1.6,.7,THEMES[S.theme].acc);}
   for(const t of this.tele){const k=t.age/t.max;
@@ -131,7 +131,7 @@ class Level{
    else if(t.t==='shell'){groundEll(t.x,t.y,t.r,rgba('#ff2a2a',.1+.25*k),'#ff4a3a',.9,3);groundEll(t.x,t.y,t.r*k,null,'#ffaa40',.9,2);}}
   const b=this.boss;if(b&&b.bs==='aim'){const L=9,w=.45,a=Math.atan2(b.diry,b.dirx),nx=-Math.sin(a)*w,ny=Math.cos(a)*w;poly([isx(b.x+nx,b.y+ny),isy(b.x+nx,b.y+ny),isx(b.x+nx+b.dirx*L,b.y+ny+b.diry*L),isy(b.x+nx+b.dirx*L,b.y+ny+b.diry*L),isx(b.x-nx+b.dirx*L,b.y-ny+b.diry*L),isy(b.x-nx+b.dirx*L,b.y-ny+b.diry*L),isx(b.x-nx,b.y-ny),isy(b.x-nx,b.y-ny)],`rgba(255,60,120,${.18+.15*Math.sin(this.t*30)})`);}
   const items=[];
-  for(const q of this.props){const x=isx(q.cx,q.cy),y=isy(q.cx,q.cy);if(Math.abs(x-CX)>hw+60||Math.abs(y-CY)>hh+120)continue;items.push({k:q.cx+q.cy,t:0,o:q});}
+  for(const q of this.props){const x=isx(q.cx,q.cy),y=isy(q.cx,q.cy);if(Math.abs(x-CX)>hw+60||Math.abs(y-CY)>hh+120)continue;items.push({k:(q.x+q.w)+(q.y+q.d),t:0,o:q});}
   for(const k of this.pick)if(!k.got)items.push({k:k.x+k.y,t:1,o:k});
   for(const n of this.npcs)items.push({k:n.x+n.y,t:2,o:n});
   for(const e of this.enemies)if(!e.dead)items.push({k:e.x+e.y,t:3,o:e});

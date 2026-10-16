@@ -24,10 +24,11 @@
   Player.prototype.attack=function(useMouse){
    this.comboN=(this.comboN||0)+1;this.comboT=1.15;
    const fin=this.comboN>=3;if(fin)this.comboN=0;
+   const lv=this.lv;
    if(fin){G.maxCombo=(G.maxCombo||0)+1;lv.fl&&lv.fl(this.x,this.y-1,'FINISHER','#ff9a5a');}
    atkP.call(this,useMouse);
    if(fin){
-    const lv=this.lv;let n=0;
+    let n=0;
     for(const e of lv.enemies){
      if(e.dead||e.dying||e.hurtT<.05)continue;
      const d=dst(this.x,this.y,e.x,e.y)-e.r;

@@ -64,8 +64,16 @@ def('wall',1,.3,p=>{box(p.x,p.y,0,p.w,p.d,p.h||2.4,p.col||'#5d574d');if(p.win){i
  box(p.x-.3,p.y-.3,h,p.w+.6,p.d+.6,.3,p.roof||'#3a2a2a');box(p.x+.4,p.y+.4,h+.3,p.w-.8,p.d-.8,.7,mixc(p.roof||'#3a2a2a',1.15));box(p.x+p.w-1.2,p.y+.6,h+.3,.5,.5,1.1,'#4a3a34');},{tall:1});def('ruin',5,4,p=>{const h=p.h||4,c=p.col||'#2e2925';box(p.x,p.y,0,p.w,p.d,h,c);box(p.x+p.w*.5,p.y,h,p.w*.5,p.d*.6,.6+(p.x%1),mixc(c,.8));box(p.x,p.y+p.d*.5,h,p.w*.35,p.d*.5,.3,mixc(c,.9));
  for(let r=0;r<Math.floor(h-1);r++)for(let k=0;k<Math.floor(p.w/1.3);k++)if(((r*5+k*3+(p.x|0))%4)!==0)fr(p,.08+k*(1/Math.floor(p.w/1.3)),.08+k*(1/Math.floor(p.w/1.3))+.12,.8+r*1.0,1.5+r*1.0,((r+k)%3===0)?'#6a4a1a':'#14100e');},{tall:1});def('fence',1,.14,p=>{box(p.x,p.y,0,p.w,p.d,.85,'#5a4d40');box(p.x-.02,p.y-.02,.75,p.w+.04,p.d+.04,.1,'#7a6a58');});def('slight',.3,.3,p=>{box(p.x+.1,p.y+.1,0,.1,.1,3.3,'#2c2f33',true);box(p.x,p.y,3.3,.3,.3,.15,'#ffe9b0');glowDot(p.cx,p.cy,3.3,12,'#ffd58a',.35);},{lt:{r:9,i:.95,c:'#ffd58a',z:3.2},tall:1});def('barrel',.5,.5,p=>{box(p.x+.05,p.y+.05,0,.4,.4,.7,p.col||'#7a3326');box(p.x+.03,p.y+.03,.7,.44,.44,.04,'#222222',true);if(p.fire){const f=.5+.5*Math.sin(T*13+p.x*3);glowDot(p.cx,p.cy,1.0+f*.15,10+f*4,'#ff9a30',.8);glowDot(p.cx,p.cy,1.2+f*.2,5,'#ffe070',.9);}});def('dump',1.7,.9,p=>{box(p.x,p.y,0,p.w,p.d,.95,'#2f5a3a');box(p.x-.04,p.y-.04,.95,p.w+.08,p.d+.08,.1,'#244a2e');});def('barr',2,.5,p=>{box(p.x,p.y,0,p.w,p.d,.9,'#d6d6d6');for(let i=0;i<4;i++)fr(p,.04+i*.25,.04+i*.25+.12,.12,.8,'#c0352f');});def('sand',2,.7,p=>{box(p.x,p.y,0,p.w,p.d,.5,'#8a7a58');box(p.x+.1,p.y+.1,.5,p.w-.2,p.d-.2,.3,'#7a6a4a');});def('pump',.6,.5,p=>{box(p.x,p.y,0,p.w,p.d,1.3,'#b33a30');fr(p,.2,.8,.8,1.1,'#222222');fr(p,.2,.8,.2,.6,'#e8e8e8');});def('mail',.3,.3,p=>{box(p.x+.12,p.y+.12,0,.06,.06,.8,'#444444',true);box(p.x,p.y,.8,.3,.3,.22,'#3a5a8a');});def('bunker',10,4,p=>{box(p.x,p.y,0,p.w,p.d,3.4,'#4a4d4e');box(p.x-.3,p.y-.3,3.4,p.w+.6,p.d+.6,.35,'#3a3d3e');fr(p,.38,.62,0,2.3,'#2b3033');fr(p,.4,.6,.1,2.2,'#383e42');fr(p,.3,.7,2.6,3.15,'#0c2a1a');glowDot(p.x+p.w*.5,p.y+p.d,2.9,14,'#4dff9a',.5);},{tall:1,lt:{r:8,i:.9,c:'#4dff9a',z:2.5}});def('gate',2,.3,p=>{if(p.open){box(p.x,p.y,0,p.w,p.d,.12,'#555555',true);}else{box(p.x,p.y,0,p.w,p.d,1.8,'#666b6f');for(let i=0;i<3;i++)fr(p,.1+i*.3,.1+i*.3+.15,.2,1.6,'#c0352f');glowDot(p.cx,p.cy,1.95,8,'#ff3030',.5+.4*Math.sin(T*6));}});
 
-/* ---------- halo rings & wrecked vehicles ---------- */
-function haloRing(x,y,col){const pu=.72+.18*Math.sin(T*3+(x+y)*.7);groundEll(x,y,.55,null,col,Math.min(.5,.28+.14*pu),3);groundEll(x,y,.55,rgba(col,.05),null,.9);}
+/* ---------- grounded contact rings & wrecked vehicles ---------- */
+function haloRing(x,y,col){
+ cx.save();
+ cx.globalAlpha = 0.22;
+ cx.fillStyle = '#000000';
+ cx.beginPath();
+ cx.ellipse(isx(x,y), isy(x,y,0), 16, 8, 0, 0, 6.2832);
+ cx.fill();
+ cx.restore();
+}
 def('carburn',2.3,1.1,p=>{const FT=.5+.5*Math.sin(T*7+p.x*3);shadow(p.cx,p.cy,Math.max(p.w,p.d)*.5,.3);
  box(p.x,p.y,.05,p.w*.94,p.d*.5,.3,'#191919');
  box(p.x+p.w*.05,p.y+p.d*.02,.35,p.w*.5,p.d*.42,.3,'#0f0f0f');

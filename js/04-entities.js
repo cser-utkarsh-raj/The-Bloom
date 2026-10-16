@@ -16,7 +16,7 @@ class Player{
   if((took('KeyF')||took('KeyC'))&&this.dodCd<=0&&this.stam>=18&&!this.carry&&this.dodT<=0){this.dodT=.28;this.dodCd=.9;this.stam-=18;this.sd=.5;this.inv=Math.max(this.inv,.3);if(mv){this.dx=wx;this.dy=wy;}else{this.dx=Math.cos(this.f);this.dy=Math.sin(this.f);}SFX.swing();for(let i=0;i<6;i++)lv.part(this.x,this.y,.2,rnd(-1,1),rnd(-1,1),.5,.35,'#9ac8ff',2,false);}
   let sp=4.1;if(this.sprint)sp*=1.6;if(this.carry)sp*=.85;
   if(this.dodT>0)lv.moveEnt(this,this.dx*10*dt,this.dy*10*dt);
-  else if(mv){lv.moveEnt(this,wx*sp*dt,wy*sp*dt);if(this.swT<=0)this.f+=angD(Math.atan2(wy,wx),this.f)*Math.min(1,dt*14);this.ph+=dt*sp*2.4;this.stepT-=dt;if(this.stepT<=0){this.stepT=this.sprint?.28:.5;if(this.sprint)lv.noise(this.x,this.y,5.5);}}
+  else if(mv){lv.moveEnt(this,wx*sp*dt,wy*sp*dt);if(this.swT<=0)this.f+=angD(Math.atan2(wy,wx),this.f)*Math.min(1,dt*24);this.ph+=dt*sp*2.6;this.stepT-=dt;if(this.stepT<=0){this.stepT=this.sprint?.28:.5;if(this.sprint)lv.noise(this.x,this.y,5.5);}}
   /* aim point: mouse on desktop, last touch point on mobile (set by 12-mobile) */
   this.aimX=mouse.x;this.aimY=mouse.y;
   if(typeof TOUCH!=='undefined'&&TOUCH.on){this.aimX=TOUCH.x;this.aimY=TOUCH.y;}
@@ -55,18 +55,43 @@ class Player{
   if(G.hp<=0){G.hp=0;lv.fail('David has fallen.');}}
 }
 class Daughter{
- constructor(lv,x,y){Object.assign(this,{lv,x,y,r:.25,max:Math.round(100*(S.difficulty==='story'?1.3:1)),carried:false,trust:G.trust,ph:0,scared:0,f:0,hT:0});this.hp=this.max;}
- update(dt){const lv=this.lv,p=lv.player;this.hT-=dt;if(this.carried){this.x=p.x;this.y=p.y;this.trust=Math.min(100,this.trust+dt*2);return;}
+ constructor(lv,x,y){Object.assign(this,{lv,x,y,r:.25,max:Math.round(100*(S.difficulty==='story'?1.3:1)),carried:false,trust:G.trust,ph:0,scared:0,f:0,hT:0,lx:x,ly:y,stuckT:0,warnT:0});this.hp=this.max;}
+ update(dt){const lv=this.lv,p=lv.player;this.hT-=dt;this.warnT-=dt;if(this.carried){this.x=p.x;this.y=p.y;this.trust=Math.min(100,this.trust+dt*2);this.lx=this.x;this.ly=this.y;return;}
   if(lv.hitSolid(this.x,this.y,this.r)){const pa=Math.atan2(p.y-this.y,p.x-this.x);for(let k=1;k<=8;k++){const ang=pa+(k%2?1:-1)*Math.floor(k/2)*0.6;const qx=this.x+Math.cos(ang)*0.45,qy=this.y+Math.sin(ang)*0.45;if(!lv.hitSolid(qx,qy,this.r)){this.x=qx;this.y=qy;break;}}}
   const d=dst(this.x,this.y,p.x,p.y);let near=false;for(const e of lv.enemies)if(!e.dead&&e.state==='chase'&&dst(e.x,e.y,this.x,this.y)<5){near=true;break;}
   this.scared=near?Math.min(1,this.scared+dt*2):Math.max(0,this.scared-dt);
-  if(d<3)this.trust=Math.min(100,this.trust+dt*1.2);else if(d>9)this.trust=Math.max(0,this.trust-dt*3);
-  const stay=this.scared>.5?1.4:2.3;
-  if(d>stay){const k=.55+.45*this.trust/100;let sp=Math.min(5.4,2+d*.9)*k*(this.scared>.5&&this.trust<35?.45:1),tx=p.x,ty=p.y;
-   if(!lv.clear(this.x,this.y,tx,ty,.22)){const n=lv.flowStep(lv.fP,this.x,this.y);if(n){tx=n[0];ty=n[1];}}
-   const a=Math.atan2(ty-this.y,tx-this.x);this.f=a;lv.moveEnt(this,Math.cos(a)*sp*dt,Math.sin(a)*sp*dt);this.ph+=dt*sp*2.4;}
-  else if(d<.8){const a=Math.atan2(this.y-p.y,this.x-p.x);lv.moveEnt(this,Math.cos(a)*dt*2,Math.sin(a)*dt*2);}
-  if(this.trust<30&&near&&Math.random<dt*.2)say('"Papa… I\'m scared…"',2200,'#ffd34d');}
+  if(d<3.2)this.trust=Math.min(100,this.trust+dt*1.2);else if(d>11)this.trust=Math.max(0,this.trust-dt*1.5);
+  const stay=this.scared>.5?1.2:1.6;
+  if(d>stay){
+   let sp=Math.min(8.0, 3.6 + Math.max(0, d-stay)*1.5);
+   let tx=p.x,ty=p.y;
+   if(!lv.clear(this.x,this.y,tx,ty,.22)||d>3.8){
+    const n=lv.flowStep(lv.fP,this.x,this.y);
+    if(n){tx=n[0];ty=n[1];}
+   }
+   let a=Math.atan2(ty-this.y,tx-this.x);
+   const moveDist=Math.hypot(this.x-this.lx, this.y-this.ly);
+   if(moveDist<0.015*dt*60){
+    this.stuckT+=dt;
+    if(this.stuckT>0.18){
+     const altN=lv.flowStep(lv.fP,this.x+(Math.random()-.5)*.5,this.y+(Math.random()-.5)*.5);
+     if(altN){a=Math.atan2(altN[1]-this.y,altN[0]-this.x);}
+     else{a+=(Math.sin(lv.t*10)>0?1:-1)*1.2;}
+    }
+   }else{this.stuckT=Math.max(0,this.stuckT-dt*2);}
+   this.f=a;
+   lv.moveEnt(this,Math.cos(a)*sp*dt,Math.sin(a)*sp*dt);
+   this.ph+=dt*sp*2.5;
+   if(d>7&&this.warnT<=0){this.warnT=8;say(pick(['"Papa, wait for me!"','"Papa, don\'t leave me behind!"']),2200,'#ffd34d');}
+  }else if(d<.75){
+   const a=Math.atan2(this.y-p.y,this.x-p.x);
+   lv.moveEnt(this,Math.cos(a)*dt*2.2,Math.sin(a)*dt*2.2);
+   this.ph=0;this.f=p.f;
+  }else{
+   this.ph=0;this.f=p.f;
+  }
+  this.lx=this.x;this.ly=this.y;
+  if(this.trust<30&&near&&Math.random()<dt*.2)say('"Papa… I\'m scared…"',2200,'#ffd34d');}
  hurt(d){if(this.carried||this.lv.over)return;if(!Number.isFinite(d)||d<=0)d=1;this.hp-=d;this.hT=2;this.trust=Math.max(0,this.trust-6);SFX.hurt();this.lv.fl(this.x,this.y,'-'+Math.round(d),'#ffd34d');if(this.hp<=0){this.hp=0;this.lv.fail('Nancy is gone.');}}
 }
 
@@ -79,9 +104,9 @@ const ET={
 const BOSSLINES=['"David... it\'s burning inside my skull... make it stop..."','"Where is Nancy?! Tell me she\'s safe... please!"','"The noise won\'t stop... like black waves drowning my thoughts..."','"Don\'t let Nancy see me like this... please David... shoot me..."','"My hands... I can\'t control my own hands anymore..."','"It hurts so much... David, forgive me... I can\'t stop moving..."'];
 class Enemy{
  constructor(lv,type,x,y,o){o=o||{};const T0=ET[type],D=DIFFS[S.difficulty];
-  Object.assign(this,{lv,type,x,y,r:T0.r,hp:T0.hp*D.hp,spd:T0.spd*D.spd,dmg:T0.dmg*D.dmg,sense:T0.sense,reach:T0.reach,windT:T0.windT,cdMax:T0.cd,sc:T0.sc,state:'patrol',f:rnd(0,6.28),ph:rnd(0,6),cd:rnd(0,.8),wind:0,hurtT:0,stun:0,dead:false,dying:false,fuse:0,hx:x,hy:y,pr:o.pr||3.5,pauseT:rnd(0,2),wp:null,wpT:0,hunt:!!o.hunt,zone:o.zone||0,tgt:'p',lostT:0,ax:x,ay:y,searchT:0,lunge:0,lungeCd:rnd(1,3),seed:Math.random*10,shirt:pick(['#6b4a3a','#4a5a6b','#5a4a5a','#6b6b4a','#3f5f4f','#7a5a3a'])});
+  Object.assign(this,{lv,type,x,y,r:T0.r,hp:T0.hp*D.hp,spd:T0.spd*D.spd,dmg:T0.dmg*D.dmg,sense:T0.sense,reach:T0.reach,windT:T0.windT,cdMax:T0.cd,sc:T0.sc,state:'patrol',f:rnd(0,6.28),ph:rnd(0,6),cd:rnd(0,.8),wind:0,hurtT:0,stun:0,dead:false,dying:false,fuse:0,hx:x,hy:y,pr:o.pr||3.5,pauseT:rnd(0,2),wp:null,wpT:0,hunt:!!o.hunt,zone:o.zone||0,tgt:'p',lostT:0,ax:x,ay:y,searchT:0,lunge:0,lungeCd:rnd(1,3),seed:Math.random()*10,shirt:pick(['#6b4a3a','#4a5a6b','#5a4a5a','#6b6b4a','#3f5f4f','#7a5a3a'])});
   this.max=this.hp;if(type==='boss'){Object.assign(this,{bs:'idle',bt:0,phase:1,abT:4,awake:false,dirx:0,diry:1,lineT:9,hitDone:false});}}
- goto(x,y,sp,dt){const a=Math.atan2(y-this.y,x-this.x);this.f+=angD(a,this.f)*Math.min(1,dt*10);this.lv.moveEnt(this,Math.cos(a)*sp*dt,Math.sin(a)*sp*dt);this.ph+=dt*sp*2.2;}
+ goto(x,y,sp,dt){const a=Math.atan2(y-this.y,x-this.x);this.f+=angD(a,this.f)*Math.min(1,dt*14);this.lv.moveEnt(this,Math.cos(this.f)*sp*dt,Math.sin(this.f)*sp*dt);this.ph+=dt*sp*2.4;}
  steer(tx,ty,sp,dt,field){const lv=this.lv;if(!lv.clear(this.x,this.y,tx,ty,this.r*.9)){const n=lv.flowStep(field,this.x,this.y);if(n){tx=n[0];ty=n[1];}}this.goto(tx,ty,sp,dt);}
  update(dt){
   if(this.dead)return;const lv=this.lv;this.hurtT-=dt;this.cd-=dt;
@@ -117,7 +142,7 @@ class Enemy{
    case'walk':{this.f+=angD(face,this.f)*Math.min(1,dt*6);const sp=this.spd*(ph===1?1:ph===2?1.2:1.4);
     if(this.wind>0){this.wind-=dt;if(this.wind<=0){if(dst(this.x,this.y,p.x,p.y)<this.r+p.r+1.2)p.hurt(this.dmg,face);this.cd=1.3-ph*.1;SFX.hit();}}
     else if(dp>this.r+p.r+.7)this.steer(p.x,p.y,sp,dt,lv.fP);else if(this.cd<=0)this.wind=.5;
-    this.abT-=dt;if(ph>=2&&this.abT<=0&&dp>3&&this.wind<=0){if(ph===3&&Math.random<.5){this.bs='scream';this.bt=1;lv.tele.push({t:'ring',x:this.x,y:this.y,r:4.2,age:0,max:1});SFX.roar();}else{this.bs='aim';this.bt=1;this.dirx=Math.cos(face);this.diry=Math.sin(face);}this.abT=ph===3?3.2:4.5;}
+    this.abT-=dt;if(ph>=2&&this.abT<=0&&dp>3&&this.wind<=0){if(ph===3&&Math.random()<.5){this.bs='scream';this.bt=1;lv.tele.push({t:'ring',x:this.x,y:this.y,r:4.2,age:0,max:1});SFX.roar();}else{this.bs='aim';this.bt=1;this.dirx=Math.cos(face);this.diry=Math.sin(face);}this.abT=ph===3?3.2:4.5;}
     break;}
    case'aim':{if(this.bt>.25){const a=Math.atan2(p.y-this.y,p.x-this.x);this.dirx=Math.cos(a);this.diry=Math.sin(a);this.f=a;}if(this.bt<=0){this.bs='charge';this.bt=.55;this.hitDone=false;SFX.roar();}break;}
    case'charge':{const ox=this.x,oy=this.y;lv.moveEnt(this,this.dirx*11*dt,this.diry*11*dt);this.ph+=dt*14;
