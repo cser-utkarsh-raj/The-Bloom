@@ -14,7 +14,9 @@ const seeded=s=>()=>(s=(s*16807)%2147483647)/2147483647;
 function getSeed(){if(GLOBAL_SEED!==null)return GLOBAL_SEED;const urlParams=new URLSearchParams(window.location.search);const seed=urlParams.get('seed');if(seed!==null){GLOBAL_SEED=parseInt(seed)||Date.now();return GLOBAL_SEED;}return Date.now();}
 
 /* ---------- canvas ---------- */
-const cv=$('c'),cx=cv.getContext('2d');
+const cv=$('c');
+let cx=cv.getContext('2d');
+window.cx=cx;
 const lc=document.createElement('canvas'),lx=lc.getContext('2d');
 let W=innerWidth,H=innerHeight,DPR=1,Z=1;
 function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';lc.width=Math.max(2,W>>1);lc.height=Math.max(2,H>>1);const oc=$('oc');oc.width=W;oc.height=H;}addEventListener('resize',resize);

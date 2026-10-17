@@ -36,8 +36,9 @@ function frame(now){
  // Keep the boot shield over the canvas until the actual menu image has been drawn.
  // This prevents the procedural fallback/old canvas state flashing during asset loading.
  if(!bootShieldReleased){
+  const isMob=Boolean(window.IS_MOBILE);
   const menuImage=typeof getSceneImg==='function'?getSceneImg('menu'):null;
-  if((menuImage&&(menuImage.loaded||menuImage.failed))||now-bootStarted>5000){
+  if(isMob||(menuImage&&(menuImage.loaded||menuImage.failed))||now-bootStarted>400){
    bootShieldReleased=true;const shield=$('boot-shield');if(shield)shield.classList.add('boot-ready');
   }
  }
@@ -47,12 +48,14 @@ function boot(){
  resize();makeTextures();makeGrain();applyTheme();
  if(typeof window.BloomMegaUI!=='undefined'){
   BloomMegaUI.init({
-   quality:(typeof S!=='undefined'&&S.gfx)||'high',
+   quality:window.IS_MOBILE?'low':((typeof S!=='undefined'&&S.gfx)||'high'),
    reducedMotion:!!(typeof S!=='undefined'&&S.reducedMotion)
   });
  }
  const cmd=new URLSearchParams(window.location.search).get('cmd');
- if(cmd==='chapters')showChapters();else if(cmd==='settings')showSettings();else showMenu();
+ if(window.IS_MOBILE){
+  if(typeof BloomCharacterShowcase!=='undefined')BloomCharacterShowcase.open(true);
+ }else if(cmd==='chapters')showChapters();else if(cmd==='characters')showCharacters();else if(cmd==='settings')showSettings();else showMenu();
  requestAnimationFrame(frame);
 }
 boot();

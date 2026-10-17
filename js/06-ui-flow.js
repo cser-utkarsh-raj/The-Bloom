@@ -992,7 +992,7 @@ function showChapters(){const n=['Home Defence','The Face I Loved','Miles of Sil
   </div>`;
  }).join('');
  showOv(`<div class="ttl" style="font-size:34px">CHAPTERS</div><div class="sub">SELECT A CHAPTER TO BEGIN</div><div class="chapter-list">${cards}</div><div class="row" style="margin-top:16px"><button class="btn" onclick="showMenu()">\u2190 BACK</button></div>`,'menu');}
-function chapter(i){G=newGame();G.level=i;showIntro(i);}
+function chapter(i){if(window.IS_MOBILE){if(typeof showMobileBlocker==='function')showMobileBlocker();return;}G=newGame();G.level=i;showIntro(i);}
 function showMenu(){applyTheme();settingsBack='menu';state='menu';LV=null;$('hud').style.display='none';applyTheme();
  const contCh=Math.min(unlocked,4);
  showOv(`<div class="menu-shell">
@@ -1003,19 +1003,20 @@ function showMenu(){applyTheme();settingsBack='menu';state='menu';LV=null;$('hud
    ${unlocked>0?`<button class="btn continue-btn" onclick="chapter(${contCh})">CONTINUE</button>`:''}
    <button class="btn" onclick="newRun()">NEW GAME</button>
    <button class="btn" onclick="showChapters()">CHAPTERS</button>
+   <button class="btn" onclick="showCharacters()">CHARACTERS</button>
    <button class="btn" onclick="settingsBack='menu';showSettings()">SETTINGS</button>
    <button class="btn" onclick="showControls()">CONTROLS</button>
   </div>
   <div class="txt menu-quote">"The horror is not the monsters.<br>It is watching the world decay while you try to keep one person safe."</div>
   <div class="menu-version">THE BLOOM \u2014 2000s SURVIVAL HORROR &nbsp;&bull;&nbsp; <span class="diff-badge ${S.difficulty}">${DIFFS[S.difficulty].name}</span></div>
  </div>`,'menu');}
-function newRun(){G=newGame();showIntro(0);}
+function newRun(){if(window.IS_MOBILE){if(typeof showMobileBlocker==='function')showMobileBlocker();return;}G=newGame();showIntro(0);}
 let introIdx=0;
 function showIntro(i){introIdx=i;state='intro';const I=INTRO[i];$('hud').style.display='none';
  showOv(`<div class="sub" style="margin-top:0">CHAPTER ${i+1} OF 5</div><div class="ttl" style="font-size:54px">${I.t}</div>
  <div class="txt" id="typ"></div><div class="sub" style="color:#ffc46b">${I.tip}</div><button class="btn" onclick="introGo()">\u25b6 BEGIN</button>`,I.scene);
  let n=0;const el=$('typ');const iv=setInterval(()=>{if(state!=='intro'||!$('typ')){clearInterval(iv);return;}n+=2;el.textContent=I.txt.slice(0,n);if(n>=I.txt.length)clearInterval(iv);},28);}
-function introGo(){if(state==='intro')startLevel(introIdx);}
+function introGo(){if(window.IS_MOBILE){if(typeof showMobileBlocker==='function')showMobileBlocker();return;}if(state==='intro')startLevel(introIdx);}
 function showPause(){if(state==='play')settingsBack='pause';state='pause';showOv(`<div class="ttl" style="font-size:54px">PAUSED</div><div class="sub">${INTRO[G.level].t}</div>
  <button class="btn" onclick="resume()">\u25b6 RESUME</button><button class="btn" onclick="settingsBack='pause';showSettings()">\u2699 SETTINGS</button><button class="btn" onclick="showMenu()">\u2302 QUIT TO MENU</button>`);state='pause';}
 function resume(){if(state!=='pause'||!LV)return;$('ov').style.display='none';state='play';}
