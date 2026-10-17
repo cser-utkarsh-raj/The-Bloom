@@ -103,12 +103,12 @@ const ET={
  drifter:{hp:55,spd:1.7,dmg:8,r:.3,sense:7,reach:.5,windT:.38,cd:1.1,sc:1},
  stalker:{hp:38,spd:2.7,dmg:11,r:.3,sense:9,reach:.5,windT:.24,cd:1,sc:1.05},
  bloated:{hp:95,spd:1.05,dmg:14,r:.5,sense:6,reach:.6,windT:.5,cd:1.4,sc:1.3},
- boss:{hp:430,spd:2.2,dmg:20,r:.55,sense:99,reach:.9,windT:.5,cd:1.2,sc:1.4}};
-const BOSSLINES=['"David... it\'s burning inside my skull... make it stop..."','"Where is Nancy?! Tell me she\'s safe... please!"','"The noise won\'t stop... like black waves drowning my thoughts..."','"Don\'t let Nancy see me like this... please David... shoot me..."','"My hands... I can\'t control my own hands anymore..."','"It hurts so much... David, forgive me... I can\'t stop moving..."'];
+ boss:{hp:260,spd:2.1,dmg:14,r:.55,sense:99,reach:.85,windT:.45,cd:1.3,sc:1.35}};
+const BOSSLINES=['"David... it\'s burning inside my skull... make it stop..."','"Where is Nancy?! Tell me she\'s safe... please!"','"The noise won\'t stop... like black waves drowning my thoughts..."','"Don\'t let Nancy see me like this... please David... shoot me..."','"My hands... I can\'t control my own hands anymore..."','"It hurts so much... David, forgive me... I can\'t stop moving..."','"I remember the porch in July... the beach with Nancy... keep her safe..."','"David, run! Don\'t let the spores reach her eyes!"'];
 class Enemy{
  constructor(lv,type,x,y,o){o=o||{};const T0=ET[type],D=DIFFS[S.difficulty];
   Object.assign(this,{lv,type,x,y,r:T0.r,hp:T0.hp*D.hp,spd:T0.spd*D.spd,dmg:T0.dmg*D.dmg,sense:T0.sense,reach:T0.reach,windT:T0.windT,cdMax:T0.cd,sc:T0.sc,state:'patrol',f:rnd(0,6.28),ph:rnd(0,6),cd:rnd(0,.8),wind:0,hurtT:0,stun:0,dead:false,dying:false,fuse:0,hx:x,hy:y,pr:o.pr||3.5,pauseT:rnd(0,2),wp:null,wpT:0,hunt:!!o.hunt,zone:o.zone||0,tgt:'p',lostT:0,ax:x,ay:y,searchT:0,lunge:0,lungeCd:rnd(1,3),seed:Math.random()*10,shirt:pick(['#6b4a3a','#4a5a6b','#5a4a5a','#6b6b4a','#3f5f4f','#7a5a3a'])});
-  this.max=this.hp;if(type==='boss'){Object.assign(this,{bs:'idle',bt:0,phase:1,abT:4,awake:false,dirx:0,diry:1,lineT:9,hitDone:false});}}
+  this.max=this.hp;if(type==='boss'){Object.assign(this,{bs:'idle',bt:0,phase:1,abT:4,awake:false,dirx:0,diry:1,lineT:8,hitDone:false});}}
  goto(x,y,sp,dt){const a=Math.atan2(y-this.y,x-this.x);this.f+=angD(a,this.f)*Math.min(1,dt*14);this.lv.moveEnt(this,Math.cos(this.f)*sp*dt,Math.sin(this.f)*sp*dt);this.ph+=dt*sp*2.4;}
  steer(tx,ty,sp,dt,field){const lv=this.lv;if(!lv.clear(this.x,this.y,tx,ty,this.r*.9)){const n=lv.flowStep(field,this.x,this.y);if(n){tx=n[0];ty=n[1];}}this.goto(tx,ty,sp,dt);}
  update(dt){
@@ -138,19 +138,19 @@ class Enemy{
  updBoss(dt){
   const lv=this.lv,p=lv.player;if(!this.awake){this.ph+=dt*.4;return;}
   const fr=this.hp/this.max,ph=fr>.6?1:fr>.3?2:3;if(ph!==this.phase){this.phase=ph;lv.bossPhase(ph);}
-  this.bt-=dt;this.lineT-=dt;if(this.lineT<=0){this.lineT=rnd(9,14);say(pick(BOSSLINES),3200,'#d68cff');}
+  this.bt-=dt;this.lineT-=dt;if(this.lineT<=0){this.lineT=rnd(8,13);say(pick(BOSSLINES),3200,'#d68cff');}
   const dp=dst(this.x,this.y,p.x,p.y),face=Math.atan2(p.y-this.y,p.x-this.x);
   switch(this.bs){
    case'idle':this.bs='walk';break;
-   case'walk':{this.f+=angD(face,this.f)*Math.min(1,dt*6);const sp=this.spd*(ph===1?1:ph===2?1.2:1.4);
-    if(this.wind>0){this.wind-=dt;if(this.wind<=0){if(dst(this.x,this.y,p.x,p.y)<this.r+p.r+1.2)p.hurt(this.dmg,face);this.cd=1.3-ph*.1;SFX.hit();}}
-    else if(dp>this.r+p.r+.7)this.steer(p.x,p.y,sp,dt,lv.fP);else if(this.cd<=0)this.wind=.5;
-    this.abT-=dt;if(ph>=2&&this.abT<=0&&dp>3&&this.wind<=0){if(ph===3&&Math.random()<.5){this.bs='scream';this.bt=1;lv.tele.push({t:'ring',x:this.x,y:this.y,r:4.2,age:0,max:1});SFX.roar();}else{this.bs='aim';this.bt=1;this.dirx=Math.cos(face);this.diry=Math.sin(face);}this.abT=ph===3?3.2:4.5;}
+   case'walk':{this.f+=angD(face,this.f)*Math.min(1,dt*6);const sp=this.spd*(ph===1?1:ph===2?1.15:1.35);
+    if(this.wind>0){this.wind-=dt;if(this.wind<=0){if(dst(this.x,this.y,p.x,p.y)<this.r+p.r+1.1)p.hurt(this.dmg,face);this.cd=1.4-ph*.1;SFX.hit();}}
+    else if(dp>this.r+p.r+.7)this.steer(p.x,p.y,sp,dt,lv.fP);else if(this.cd<=0)this.wind=.45;
+    this.abT-=dt;if(ph>=2&&this.abT<=0&&dp>2.8&&this.wind<=0){if(ph===3&&Math.random()<.45){this.bs='scream';this.bt=1;lv.tele.push({t:'ring',x:this.x,y:this.y,r:4.2,age:0,max:1});SFX.roar();if(typeof lv.onBossScream==='function')lv.onBossScream();}else{this.bs='aim';this.bt=1.6;this.dirx=Math.cos(face);this.diry=Math.sin(face);if(typeof lv.onBossAim==='function')lv.onBossAim();}this.abT=ph===3?3.5:4.8;}
     break;}
-   case'aim':{if(this.bt>.25){const a=Math.atan2(p.y-this.y,p.x-this.x);this.dirx=Math.cos(a);this.diry=Math.sin(a);this.f=a;}if(this.bt<=0){this.bs='charge';this.bt=.55;this.hitDone=false;SFX.roar();}break;}
-   case'charge':{const ox=this.x,oy=this.y;lv.moveEnt(this,this.dirx*11*dt,this.diry*11*dt);this.ph+=dt*14;
-    if(!this.hitDone&&dst(this.x,this.y,p.x,p.y)<this.r+p.r+.35){this.hitDone=true;p.hurt(this.dmg*1.4,Math.atan2(this.diry,this.dirx));}
-    if(Math.hypot(this.x-ox,this.y-oy)<11*dt*.3){this.bs='stun';this.bt=1.4;shake(12);lv.fl(this.x,this.y,'STUNNED','#ffd34d');}else if(this.bt<=0){this.bs='recover';this.bt=.7;}break;}
+   case'aim':{if(this.bt>.6){const a=Math.atan2(p.y-this.y,p.x-this.x);this.dirx=Math.cos(a);this.diry=Math.sin(a);this.f=a;}if(this.bt<=0){this.bs='charge';this.bt=.6;this.hitDone=false;SFX.roar();}break;}
+   case'charge':{const ox=this.x,oy=this.y;lv.moveEnt(this,this.dirx*9.5*dt,this.diry*9.5*dt);this.ph+=dt*14;
+    if(!this.hitDone&&dst(this.x,this.y,p.x,p.y)<this.r+p.r+.35){this.hitDone=true;p.hurt(this.dmg*1.3,Math.atan2(this.diry,this.dirx));}
+    if(Math.hypot(this.x-ox,this.y-oy)<9.5*dt*.3){this.bs='stun';this.bt=2.6;shake(12);lv.fl(this.x,this.y,'STUNNED','#ffd34d');if(typeof lv.onBossStun==='function')lv.onBossStun();}else if(this.bt<=0){this.bs='recover';this.bt=.7;}break;}
    case'stun':case'recover':if(this.bt<=0)this.bs='walk';break;
    case'scream':if(this.bt<=0){shake(10);if(typeof window.BloomMegaUI!=='undefined'){BloomMegaUI.triggerCameraImpulse('enemy_spotted',1.2);BloomMegaUI.triggerGlitch(0.6,0.3);}if(dp<4.2)p.hurt(this.dmg*.7,face);for(let i=0;i<20;i++)lv.part(this.x,this.y,.8,rnd(-6,6),rnd(-6,6),rnd(0,2),.6,'#e060ff',3,false);this.bs='recover';this.bt=.8;}break;}
  }

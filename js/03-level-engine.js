@@ -138,7 +138,38 @@ class Level{
   setScreen();cx.fillStyle='#05090b';cx.fillRect(0,0,W,H);
   setWorld();LIGHTS.length=0;
   const hw=W/2/Z+110,hh=H/2/Z+170,p=this.player,pk=p.x+p.y;
-  for(let j=0;j<this.h;j++){const row=this.floor[j];for(let i=0;i<this.w;i++){const x=(i-j)*32,y=(i+j+1)*16;if(Math.abs(x-CX)>hw||Math.abs(y-CY)>hh)continue;const t=TEX[row[i]];cx.drawImage(t[(i+j)&1],x-33,y-17);}}
+  const pad = 16;
+  const extMat = (this.id === 1 ? 'grass' : this.id === 4 ? 'waste' : (this.id === 0 || this.id === 2 ? 'grass' : 'road'));
+  const extTex = (typeof TEX !== 'undefined' && TEX && TEX[extMat]) ? TEX[extMat] : ((typeof TEX !== 'undefined' && TEX && TEX.grass) ? TEX.grass : null);
+
+  for(let j = -pad; j < this.h + pad; j++){
+    const inJ = j >= 0 && j < this.h;
+    const row = inJ ? this.floor[j] : null;
+    for(let i = -pad; i < this.w + pad; i++){
+      const x = (i - j) * 32, y = (i + j + 1) * 16;
+      if(Math.abs(x - CX) > hw || Math.abs(y - CY) > hh) continue;
+      const inI = inJ && i >= 0 && i < this.w;
+      if(inI){
+        const t = TEX[row[i]];
+        if(t) cx.drawImage(t[(i + j) & 1], x - 33, y - 17);
+      } else if(extTex){
+        // Exterior apron beyond playable boundaries: seamless terrain
+        const t = extTex;
+        cx.drawImage(t[Math.abs(i + j) & 1], x - 33, y - 17);
+        // Volumetric distance darkening
+        const dOut = Math.max(0, -i, i - (this.w - 1), -j, j - (this.h - 1));
+        const shade = Math.min(0.92, 0.32 + dOut * 0.048);
+        cx.fillStyle = `rgba(3, 7, 10, ${shade.toFixed(2)})`;
+        cx.beginPath();
+        cx.moveTo(x, y - 16);
+        cx.lineTo(x + 32, y);
+        cx.lineTo(x, y + 16);
+        cx.lineTo(x - 32, y);
+        cx.closePath();
+        cx.fill();
+      }
+    }
+  }
   for(const s of this.stains){decalRect(s.x-s.r*.6,s.y-s.r*.6,s.r*1.2,s.r*1.2,s.col,.0);groundEll(s.x,s.y,s.r*.5,s.col,null,.45);}
   for(const d of this.decals){
    if(d.t==='rug'){decalRect(d.x,d.y,d.w,d.d,d.c1,.95);decalRect(d.x+.25,d.y+.25,d.w-.5,d.d-.5,d.c2,.95);decalRect(d.x+.5,d.y+.5,d.w-1,d.d-1,d.c1,.6);}

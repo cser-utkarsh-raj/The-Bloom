@@ -6,15 +6,24 @@ const saveBst=(i,s)=>{if((bloomBst[i]|0)>=s)return false;bloomBst[i]=s;try{local
 let subTimer=0;
 function say(txt,ms,col){
  if(!S.subs&&!col)return;
- const el=$('sub');el.textContent=txt;el.style.color=col||'';el.style.opacity=1;clearTimeout(subTimer);subTimer=setTimeout(()=>el.style.opacity=0,ms||3200);
  if(typeof window.BloomMegaUI!=='undefined'){
   let spk='david';
-  if(txt.startsWith('"')&&/papa|daddy|father|where|cold|scared/i.test(txt))spk='nancy';
-  else if(/maya|wife/i.test(txt)&&txt.startsWith('"'))spk='maya';
-  else if(/officer|broadcast|radio|dispatch/i.test(txt))spk='radio';
-  else if(!col&&/wave|barricade|hold|protect|spore|bloom|sprint|stamina|stalker|tip/i.test(txt))spk='system';
-  else if(col==='#ffd34d')spk='nancy';
-  BloomMegaUI.showDialogue(spk,txt,(ms||3500)/1000);
+  if(col==='#d68cff'||col==='#c870ff'||/skull|burn|burning|wedding|crying|beach|sweet girl|hands|control|stop moving|quiet|promise me|stay back/i.test(txt)){
+   spk='maya';
+  }else if(col==='#ffd34d'||(/papa|daddy|mommy|mama/i.test(txt)&&!/stay behind|protect|don't look|close your eyes/i.test(txt))){
+   spk='nancy';
+  }else if(col==='#9ac8ff'||col==='#7dffb0'||col==='#e8dcae'){
+   spk='david';
+  }else if(/officer|broadcast|radio|dispatch|attention remaining/i.test(txt)){
+   spk='radio';
+  }else if(!col&&/wave|barricade|hold|protect|spore|bloom|sprint|stamina|stalker|tip/i.test(txt)){
+   spk='system';
+  }
+  BloomMegaUI.showDialogue(spk,txt,(ms||3800)/1000);
+  const el=$('sub');if(el)el.style.opacity=0;
+ }else{
+  const el=$('sub');
+  if(el){el.textContent=txt;el.style.color=col||'';el.style.opacity=1;clearTimeout(subTimer);subTimer=setTimeout(()=>el.style.opacity=0,ms||3200);}
  }
 }
 let banTimer=0;

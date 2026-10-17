@@ -63,18 +63,33 @@
     const ph = ent.ph || 0;
     const isZombie = cfg.isZombie || false;
     const isNancy = cfg.isNancy || false;
+    const isMaya = cfg.isMaya || false;
+    const bs = cfg.bossState || ent.bs || 'walk';
     const isFlash = cfg.flash || false;
     const c = col => isFlash ? '#ffffff' : col;
 
     // Contact drop shadow on floor plane
-    drawGroundShadow(x, y, 0.44 * sc, 0.22 * sc, cfg.shadowAlpha || 0.42);
+    drawGroundShadow(x, y, (isMaya ? 0.56 : 0.44) * sc, (isMaya ? 0.28 : 0.22) * sc, cfg.shadowAlpha || 0.42);
 
     // Stride & gait parameters
     let strideL = 0, strideR = 0, liftL = 0, liftR = 0;
     let bob = 0, twist = 0, armSwing = 0;
-    const fwdLean = (ent.sprint ? 0.2 : moving ? 0.08 : 0) + (isZombie ? 0.22 : 0);
+    let fwdLean = (ent.sprint ? 0.2 : moving ? 0.08 : 0) + (isZombie ? 0.22 : 0);
 
-    if (isZombie) {
+    if (isMaya) {
+      if (bs === 'charge') fwdLean = 0.38;
+      else if (bs === 'scream') fwdLean = -0.16;
+      else if (bs === 'stun') fwdLean = 0.24;
+      else if (bs === 'aim') fwdLean = 0.12;
+      const strideLen = (bs === 'charge' ? 0.36 : 0.25) * sc * (cfg.gait || 1);
+      strideL = moving ? Math.sin(ph) * strideLen : 0;
+      strideR = moving ? -Math.sin(ph) * strideLen : 0;
+      liftL = moving ? Math.max(0, -Math.cos(ph)) * 0.13 * sc : 0;
+      liftR = moving ? Math.max(0, Math.cos(ph)) * 0.13 * sc : 0;
+      bob = moving ? Math.abs(Math.sin(ph)) * 0.04 * sc : Math.sin((window.T || 0) * 2.2) * 0.015 * sc;
+      twist = moving ? -Math.sin(ph) * 0.18 : 0;
+      armSwing = moving ? Math.sin(ph) * 0.24 * sc : 0;
+    } else if (isZombie) {
       // Asymmetric Limp: Left leg takes a forward step, right leg drags behind with a slight hitch
       const limpPhase = ph % (Math.PI * 2);
       strideL = moving ? Math.sin(limpPhase) * 0.26 * sc : 0;
@@ -98,33 +113,40 @@
 
     // 1. Compute 3D World Positions of All Joints
     // Pelvis
+    let pZ = z + 0.68 * sc + bob;
+    if (isMaya && bs === 'stun') {
+      pZ = z + 0.30 * sc; // Collapsed onto knees
+    }
     const pX = x + fwdX * (bob * 0.2);
     const pY = y + fwdY * (bob * 0.2);
-    const pZ = z + 0.68 * sc + bob;
 
     // Hips
-    const hipSpan = 0.12 * sc;
+    const hipSpan = (isMaya ? 0.11 : 0.12) * sc;
     const hipLX = pX + latX * (-hipSpan);
     const hipLY = pY + latY * (-hipSpan);
     const hipRX = pX + latX * hipSpan;
     const hipRY = pY + latY * hipSpan;
 
     // Feet (step forward and backward along fwdX, fwdY!)
-    const footLX = x + latX * (-hipSpan) + fwdX * strideL;
-    const footLY = y + latY * (-hipSpan) + fwdY * strideL;
-    const footLZ = z + liftL;
-
-    const footRX = x + latX * hipSpan + fwdX * strideR;
-    const footRY = y + latY * hipSpan + fwdY * strideR;
-    const footRZ = z + liftR;
+    let footLZ = z + liftL;
+    let footRZ = z + liftR;
+    if (isMaya && bs === 'stun') {
+      footLZ = z;
+      footRZ = z;
+    }
+    const footLX = x + latX * (-hipSpan) + fwdX * (isMaya && bs === 'stun' ? -0.12 * sc : strideL);
+    const footLY = y + latY * (-hipSpan) + fwdY * (isMaya && bs === 'stun' ? -0.12 * sc : strideL);
+    const footRX = x + latX * hipSpan + fwdX * (isMaya && bs === 'stun' ? -0.12 * sc : strideR);
+    const footRY = y + latY * hipSpan + fwdY * (isMaya && bs === 'stun' ? -0.12 * sc : strideR);
 
     // Torso Center
     const torsoX = pX + fwdX * (fwdLean * sc);
     const torsoY = pY + fwdY * (fwdLean * sc);
-    const torsoZ = pZ + 0.38 * sc;
+    let torsoZ = pZ + 0.38 * sc;
+    if (isMaya && bs === 'stun') torsoZ = pZ + 0.22 * sc;
 
     // Shoulders
-    const shoulderSpan = 0.20 * sc;
+    const shoulderSpan = (isMaya ? 0.17 : 0.20) * sc;
     const shTwistX = fwdX * (-twist * 0.12 * sc);
     const shTwistY = fwdY * (-twist * 0.12 * sc);
     const shLX = torsoX + latX * (-shoulderSpan) + shTwistX;
@@ -136,7 +158,7 @@
     // Head
     const headX = torsoX + fwdX * 0.04 * sc;
     const headY = torsoY + fwdY * 0.04 * sc;
-    const headZ = torsoZ + 0.34 * sc;
+    let headZ = torsoZ + (isMaya && bs === 'scream' ? 0.38 * sc : isMaya && bs === 'stun' ? 0.18 * sc : 0.34 * sc);
 
     // Hands
     let hLX = shLX + fwdX * (-armSwing) + latX * (-0.04 * sc);
@@ -147,12 +169,48 @@
     let hRY = shRY + fwdY * armSwing + latY * (0.04 * sc);
     let hRZ = shZ - 0.36 * sc + Math.abs(armSwing) * 0.25;
 
-    // If zombie, arms reach forward aggressively
-    if (isZombie) {
+    if (isMaya) {
+      if (bs === 'aim') {
+        hLX = headX + latX * (-0.14 * sc) + fwdX * 0.02 * sc;
+        hLY = headY + latY * (-0.14 * sc) + fwdY * 0.02 * sc;
+        hLZ = headZ - 0.02 * sc;
+        hRX = headX + latX * (0.14 * sc) + fwdX * 0.02 * sc;
+        hRY = headY + latY * (0.14 * sc) + fwdY * 0.02 * sc;
+        hRZ = headZ - 0.02 * sc;
+      } else if (bs === 'scream') {
+        hLX = shLX + latX * (-0.35 * sc) - fwdX * 0.15 * sc;
+        hLY = shLY + latY * (-0.35 * sc) - fwdY * 0.15 * sc;
+        hLZ = shZ + 0.22 * sc;
+        hRX = shRX + latX * (0.35 * sc) - fwdX * 0.15 * sc;
+        hRY = shRY + latY * (0.35 * sc) - fwdY * 0.15 * sc;
+        hRZ = shZ + 0.22 * sc;
+      } else if (bs === 'stun') {
+        hLX = torsoX + latX * (-0.12 * sc) + fwdX * 0.10 * sc;
+        hLY = torsoY + latY * (-0.12 * sc) + fwdY * 0.10 * sc;
+        hLZ = z + 0.06 * sc;
+        hRX = torsoX + latX * (0.12 * sc) + fwdX * 0.10 * sc;
+        hRY = torsoY + latY * (0.12 * sc) + fwdY * 0.10 * sc;
+        hRZ = z + 0.06 * sc;
+      } else if (bs === 'charge') {
+        hLX = shLX + fwdX * 0.38 * sc;
+        hLY = shLY + fwdY * 0.38 * sc;
+        hLZ = shZ - 0.18 * sc;
+        hRX = shRX + fwdX * 0.42 * sc;
+        hRY = shRY + fwdY * 0.42 * sc;
+        hRZ = shZ - 0.14 * sc;
+      } else {
+        // Walk / Stalk: Left hand near chest, right reaching
+        hLX = torsoX + latX * (-0.09 * sc) + fwdX * 0.05 * sc;
+        hLY = torsoY + latY * (-0.09 * sc) + fwdY * 0.05 * sc;
+        hLZ = torsoZ - 0.06 * sc;
+        hRX = shRX + fwdX * 0.30 * sc + latX * 0.05 * sc;
+        hRY = shRY + fwdY * 0.30 * sc + latY * 0.05 * sc;
+        hRZ = shZ - 0.10 * sc;
+      }
+    } else if (isZombie) {
       hLX = shLX + fwdX * 0.32 * sc;
       hLY = shLY + fwdY * 0.32 * sc;
       hLZ = shZ - 0.14 * sc;
-
       hRX = shRX + fwdX * 0.35 * sc;
       hRY = shRY + fwdY * 0.35 * sc;
       hRZ = shZ - 0.12 * sc;
@@ -191,7 +249,6 @@
     cx.restore();
 
     // 3. Depth Sorting: Determine Draw Order of Body Parts
-    // World depth key = (x + y + z * 0.2)
     const legLDepth = hipLX + hipLY + footLX + footLY;
     const legRDepth = hipRX + hipRY + footRX + footRY;
     const torsoDepth = torsoX + torsoY;
@@ -203,12 +260,12 @@
       {
         id: 'legL',
         depth: legLDepth,
-        draw: () => drawLimb(sHipL, sFootL, cfg.pantsCol || '#252932', cfg.shoeCol || '#141311', 4.8 * sf, 4.0 * sf)
+        draw: () => drawLimb(sHipL, sFootL, cfg.pantsCol || '#252932', cfg.shoeCol || '#141311', (isMaya ? 3.8 : 4.8) * sf, (isMaya ? 3.2 : 4.0) * sf)
       },
       {
         id: 'legR',
         depth: legRDepth,
-        draw: () => drawLimb(sHipR, sFootR, cfg.pantsCol || '#252932', cfg.shoeCol || '#141311', 4.8 * sf, 4.0 * sf)
+        draw: () => drawLimb(sHipR, sFootR, cfg.pantsCol || '#252932', cfg.shoeCol || '#141311', (isMaya ? 3.8 : 4.8) * sf, (isMaya ? 3.2 : 4.0) * sf)
       },
       {
         id: 'torso',
@@ -218,12 +275,12 @@
       {
         id: 'armL',
         depth: armLDepth,
-        draw: () => drawArm(sShL, sHandL, cfg.jacketCol || '#2d4b73', cfg.skinCol || '#d9a67e', 3.8 * sf)
+        draw: () => drawArm(sShL, sHandL, cfg.jacketCol || cfg.dressCol || '#2d4b73', cfg.skinCol || '#d9a67e', (isMaya ? 3.2 : 3.8) * sf)
       },
       {
         id: 'armR',
         depth: armRDepth,
-        draw: () => drawArm(sShR, sHandR, cfg.jacketCol || '#2d4b73', cfg.skinCol || '#d9a67e', 3.8 * sf)
+        draw: () => drawArm(sShR, sHandR, cfg.jacketCol || cfg.dressCol || '#2d4b73', cfg.skinCol || '#d9a67e', (isMaya ? 3.2 : 3.8) * sf)
       },
       {
         id: 'head',
@@ -231,6 +288,15 @@
         draw: () => drawHead(sHead)
       }
     ];
+
+    if (isMaya) {
+      const dressDepth = (hipLX + hipLY + footLX + footLY) * 0.5 + 0.05;
+      parts.push({
+        id: 'dress',
+        depth: dressDepth,
+        draw: () => drawDress(sHipL, sHipR, sFootL, sFootR)
+      });
+    }
 
     parts.sort((a, b) => a.depth - b.depth);
 
@@ -333,6 +399,63 @@
       cx.beginPath();
       cx.arc(pHand[0], pHand[1], 2.4 * sf, 0, Math.PI * 2);
       cx.fill();
+
+      // If Maya: Left hand carries the gold wedding ring
+      if (isMaya && pHand === sHandL && !isFlash) {
+        cx.save();
+        cx.fillStyle = '#ffe066';
+        cx.strokeStyle = '#ffffff';
+        cx.lineWidth = 1;
+        cx.beginPath();
+        cx.arc(pHand[0] + 0.6 * sf, pHand[1] - 0.6 * sf, 1.8 * sf, 0, Math.PI * 2);
+        cx.fill();
+        cx.stroke();
+        // Ring glint
+        cx.fillStyle = '#ffffff';
+        cx.fillRect(pHand[0] + 0.4 * sf, pHand[1] - 0.9 * sf, 1.2, 1.2);
+        cx.restore();
+      }
+
+      // If Maya: Right arm has creeping bioluminescent mycelium veins
+      if (isMaya && pHand === sHandR && !isFlash) {
+        cx.save();
+        cx.strokeStyle = cfg.glowCol || '#d68cff';
+        cx.lineWidth = 1.3;
+        cx.globalAlpha = 0.85;
+        cx.beginPath();
+        cx.moveTo(pSh[0], pSh[1]);
+        cx.quadraticCurveTo(midX + 2, midY - 1, pHand[0], pHand[1]);
+        cx.stroke();
+        cx.restore();
+      }
+
+      cx.restore();
+    }
+
+    function drawDress(hpL, hpR, ftL, ftR) {
+      cx.save();
+      cx.beginPath();
+      cx.moveTo(hpL[0], hpL[1]);
+      cx.lineTo(hpR[0], hpR[1]);
+      cx.lineTo(ftR[0] + 5 * sf, ftR[1] - 2 * sf);
+      // Tattered hem scallops
+      cx.quadraticCurveTo((ftL[0] + ftR[0]) * 0.5, (ftL[1] + ftR[1]) * 0.5 + 4 * sf, ftL[0] - 5 * sf, ftL[1] - 2 * sf);
+      cx.closePath();
+      cx.fillStyle = c(cfg.dressCol || '#452a4a');
+      cx.fill();
+      cx.strokeStyle = c(cfg.dressTrimCol || '#6b4074');
+      cx.lineWidth = 1.2;
+      cx.stroke();
+
+      // Delicate silk folds
+      cx.strokeStyle = 'rgba(20, 10, 26, 0.45)';
+      cx.lineWidth = 1.0;
+      cx.beginPath();
+      cx.moveTo((hpL[0] * 2 + hpR[0]) / 3, (hpL[1] * 2 + hpR[1]) / 3);
+      cx.lineTo(ftL[0] - 1 * sf, ftL[1] - 3 * sf);
+      cx.moveTo((hpL[0] + hpR[0] * 2) / 3, (hpL[1] + hpR[1] * 2) / 3);
+      cx.lineTo(ftR[0] + 1 * sf, ftR[1] - 3 * sf);
+      cx.stroke();
       cx.restore();
     }
 
@@ -358,8 +481,50 @@
       }
       cx.fill();
 
-      // Facial features when front-facing
-      if (isFacingFront && !isFlash && !isZombie) {
+      if (isMaya) {
+        // Maya's long flowing hair past shoulders
+        cx.fillStyle = c(cfg.hairCol || '#1a1122');
+        cx.beginPath();
+        cx.moveTo(pHead[0] - headR * 0.9, pHead[1]);
+        cx.quadraticCurveTo(pHead[0] - headR * 1.3, pHead[1] + 12 * sf, pHead[0] - headR * 0.6, pHead[1] + 17 * sf);
+        cx.quadraticCurveTo(pHead[0] - headR * 0.3, pHead[1] + 12 * sf, pHead[0] - headR * 0.4, pHead[1] + 4 * sf);
+        cx.fill();
+
+        cx.beginPath();
+        cx.moveTo(pHead[0] + headR * 0.9, pHead[1]);
+        cx.quadraticCurveTo(pHead[0] + headR * 1.3, pHead[1] + 12 * sf, pHead[0] + headR * 0.6, pHead[1] + 17 * sf);
+        cx.quadraticCurveTo(pHead[0] + headR * 0.3, pHead[1] + 12 * sf, pHead[0] + headR * 0.4, pHead[1] + 4 * sf);
+        cx.fill();
+
+        // Delicate pale blooming orchid buds pinned in hair
+        if (!isFlash) {
+          const buds = [
+            [-headR * 0.8, -headR * 0.2, '#f0a4ff'],
+            [-headR * 0.9, headR * 0.5, '#d68cff'],
+            [headR * 0.85, -headR * 0.1, '#f0a4ff']
+          ];
+          for (let b = 0; b < buds.length; b++) {
+            cx.fillStyle = buds[b][2];
+            cx.beginPath();
+            cx.arc(pHead[0] + buds[b][0], pHead[1] + buds[b][1], 1.6 * sf, 0, Math.PI * 2);
+            cx.fill();
+            cx.fillStyle = '#ffffff';
+            cx.fillRect(pHead[0] + buds[b][0] - 0.4, pHead[1] + buds[b][1] - 0.4, 0.8, 0.8);
+          }
+        }
+
+        // Eyes for Maya (amethyst in P1-P2, crimson in P3)
+        if (isFacingFront && !isFlash) {
+          const eyeCol = cfg.glowCol || '#d68cff';
+          const eyeOffset = isFacingLeft ? -1.8 * sf : isFacingRight ? 1.8 * sf : 0;
+          cx.fillStyle = eyeCol;
+          cx.shadowColor = eyeCol;
+          cx.shadowBlur = 4;
+          cx.fillRect(pHead[0] - 2.2 * sf + eyeOffset, pHead[1] - 1 * sf, 1.7 * sf, 1.7 * sf);
+          cx.fillRect(pHead[0] + 0.8 * sf + eyeOffset, pHead[1] - 1 * sf, 1.7 * sf, 1.7 * sf);
+          cx.shadowBlur = 0;
+        }
+      } else if (isFacingFront && !isFlash && !isZombie) {
         cx.fillStyle = cfg.eyeCol || '#181614';
         const eyeOffset = isFacingLeft ? -1.8 * sf : isFacingRight ? 1.8 * sf : 0;
         cx.fillRect(pHead[0] - 2.2 * sf + eyeOffset, pHead[1] - 1 * sf, 1.6 * sf, 1.6 * sf);
@@ -554,15 +719,69 @@
     }
   };
 
+  // --- MAYA / THE BLOOM-WIFE KINEMATIC RIG ---
+  window.drawMayaSprite = function (e) {
+    if (!e || e.dead) return;
+    const phase = Math.max(1, Math.min(3, e.phase || 1));
+    const fl = e.hurtT > 0;
+    const sc = 1.34 * (e.sc || 1);
+    const glow = phase === 3 ? '#ff3656' : phase === 2 ? '#ff7a42' : '#d68cff';
+    const t = typeof window.T === 'number' ? window.T : 0;
+    const pulse = 0.5 + 0.5 * Math.sin(t * (phase === 1 ? 2.2 : phase === 2 ? 3.8 : 5.4));
+
+    // Ground aura & drop shadow
+    drawGroundShadow(e.x, e.y, 0.65 * sc, 0.32 * sc, 0.46);
+    groundEll(e.x, e.y, 0.9 + phase * 0.12, 'rgba(34,5,42,0.32)', glow, 0.35, 2);
+
+    // Dynamic Kinematic Humanoid Rig
+    drawKinematicIsoHumanoid(e, {
+      scale: sc,
+      isMaya: true,
+      phase: phase,
+      bossState: e.bs || 'walk',
+      dressCol: fl ? '#ffffff' : (phase === 3 ? '#3f1c24' : '#452a4a'),
+      dressTrimCol: fl ? '#ffffff' : (phase === 3 ? '#7a2d39' : '#6b4074'),
+      skinCol: fl ? '#ffffff' : (phase === 3 ? '#a88590' : '#c8abb8'),
+      hairCol: fl ? '#ffffff' : '#1a1122',
+      glowCol: glow,
+      flash: fl,
+      shadowAlpha: 0
+    });
+
+    // Spore motes floating around silhouette
+    for (let i = 0; i < (phase === 3 ? 5 : 3); i++) {
+      const a = i * 2.1 + t * (0.35 + i * 0.08);
+      const mr = 0.34 * sc;
+      glowDot(e.x + Math.cos(a) * mr, e.y + Math.sin(a) * mr, 1.2 * sc + Math.sin(t * 2 + i) * 0.07, 4 + pulse * 2, i === 1 ? '#78ff91' : glow, 0.28 + pulse * 0.18);
+    }
+
+    // Charge speed trails
+    if (e.bs === 'charge') {
+      const dx = e.dirx || Math.cos(e.f);
+      const dy = e.diry || Math.sin(e.f);
+      for (let i = 1; i <= 3; i++) {
+        groundEll(e.x - dx * i * 0.35, e.y - dy * i * 0.35, 0.35, null, glow, 0.26 / i, 2);
+      }
+    }
+
+    // Stun stars indicator
+    if (e.bs === 'stun') {
+      cx.save();
+      cx.fillStyle = '#ffd34d';
+      cx.font = 'bold 16px "Cinzel", monospace';
+      cx.textAlign = 'center';
+      cx.fillText('✦ ✦ ✦', isx(e.x, e.y), isy(e.x, e.y, 2.5 * sc) - 10);
+      cx.restore();
+    }
+  };
+  window.drawBloomWife = window.drawMayaSprite;
+
   // --- ENEMIES (Drifters, Stalkers, Bloated, Boss Maya) ---
   const origDrawEnemy = window.drawEnemy;
   window.drawEnemy = function (e) {
     if (e.type === 'boss') {
-      if (typeof drawBloomWife === 'function') {
-        drawBloomWife(e);
-        return;
-      }
-      return origDrawEnemy.call(this, e);
+      window.drawMayaSprite(e);
+      return;
     }
 
     if (e.type === 'drifter') {

@@ -2,6 +2,10 @@
    Visual-only: Enemy.update/updBoss still owns movement, AI, attacks and hitboxes. */
 function drawBloomWife(e){
  if(!e||e.dead)return;
+ if(typeof window.drawMayaSprite==='function'){
+  window.drawMayaSprite(e);
+  return;
+ }
  const phase=Math.max(1,Math.min(3,e.phase||1)),fl=e.hurtT>0,sc=e.sc||1.4;
  const t=typeof T==='number'?T:0;
  const pulse=.5+.5*Math.sin(t*(phase===1?2.1:phase===2?3.8:5.2));

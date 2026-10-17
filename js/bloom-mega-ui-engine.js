@@ -249,17 +249,11 @@
     },
 
     maya: {
-
-      name: 'MAYA (MEMORY)',
-
-      role: 'RECORDING // ARCHIVE',
-
-      color: '#d9b48f',
-
-      accent: '#9e6b43',
-
-      pitchHz: 280
-
+      name: 'MAYA MERCER',
+      role: 'THE BLOOM-WIFE',
+      color: '#d68cff',
+      accent: '#9a44c7',
+      pitchHz: 210
     },
 
     radio: {
@@ -1142,104 +1136,19 @@
 
 
 
-  DiegeticBioMonitor.prototype.mount = function () {
-
+    DiegeticBioMonitor.prototype.mount = function () {
     if (typeof document === 'undefined' || this._mounted) return;
-
     injectSurvivalHorrorStyles();
-
-
-
-    var hl = document.getElementById('hl');
-
-    var pA = document.getElementById('pA');
-
-    var pN = document.getElementById('pN');
-
-
-
-    // Attach David's live ECG & Stamina waveform strip
-
-    if (hl && !document.getElementById('bloom-david-ecg')) {
-
-      this._davidEcgCanvas = document.createElement('canvas');
-
-      this._davidEcgCanvas.id = 'bloom-david-ecg';
-
-      this._davidEcgCanvas.className = 'bloom-ecg-strip';
-
-      this._davidEcgCanvas.width = 150;
-
-      this._davidEcgCanvas.height = 18;
-
-      this._davidEcgCtx = this._davidEcgCanvas.getContext('2d');
-
-
-
-      var bS = document.getElementById('bS');
-
-      var bSContainer = bS ? bS.parentNode : null;
-
-      if (bSContainer && bSContainer.parentNode) {
-
-        bSContainer.parentNode.insertBefore(this._davidEcgCanvas, bSContainer.nextSibling);
-
-      } else if (pA && pA.parentNode) {
-
-        pA.parentNode.insertBefore(this._davidEcgCanvas, pA.nextSibling);
-
-      } else {
-
-        hl.appendChild(this._davidEcgCanvas);
-
-      }
-
-    }
-
-
-
-    // Attach Nancy's live Heart-Rate & Trust pulse strip
-
-    if (hl && !document.getElementById('bloom-nancy-ecg')) {
-
-      this._nancyEcgCanvas = document.createElement('canvas');
-
-      this._nancyEcgCanvas.id = 'bloom-nancy-ecg';
-
-      this._nancyEcgCanvas.className = 'bloom-ecg-strip';
-
-      this._nancyEcgCanvas.width = 150;
-
-      this._nancyEcgCanvas.height = 18;
-
-      this._nancyEcgCtx = this._nancyEcgCanvas.getContext('2d');
-
-
-
-      var bN = document.getElementById('bN');
-
-      var bNContainer = bN ? bN.parentNode : null;
-
-      if (bNContainer && bNContainer.parentNode) {
-
-        bNContainer.parentNode.insertBefore(this._nancyEcgCanvas, bNContainer.nextSibling);
-
-      } else if (pN && pN.parentNode) {
-
-        pN.parentNode.insertBefore(this._nancyEcgCanvas, pN.nextSibling);
-
-      } else {
-
-        hl.appendChild(this._nancyEcgCanvas);
-
-      }
-
-    }
-
-
-
+    // Remove any legacy confusing waveform canvas strips from HUD
+    var oldD = document.getElementById('bloom-david-ecg');
+    if (oldD && oldD.parentNode) oldD.parentNode.removeChild(oldD);
+    var oldN = document.getElementById('bloom-nancy-ecg');
+    if (oldN && oldN.parentNode) oldN.parentNode.removeChild(oldN);
+    this._davidEcgCanvas = null;
+    this._davidEcgCtx = null;
+    this._nancyEcgCanvas = null;
+    this._nancyEcgCtx = null;
     this._mounted = true;
-
   };
 
 

@@ -35,33 +35,44 @@ function buildL1(){
  return L;
 }
 function buildL2(){
- const L=new Level(1,30,24,'dark'),D=DIFFS[S.difficulty];L.dark=.65;L.flicker=true;L.amb=[12,10,24];L.ui='#c870ff';
- L.fl('dark',2,2,15,22);L.fl('carpet',15,2,28,22);
- L.decal({t:'rug',x:5,y:14,w:5,d:4,c1:'#2a1030',c2:'#3a1840'});
- L.decal({t:'bloom',x:22,y:11,r:4.2});L.decal({t:'bloom',x:15,y:11,r:2.8});L.decal({t:'bloom',x:20,y:13,r:3.2});L.decal({t:'bloom',x:6,y:7,r:2.2});L.decal({t:'bloom',x:24,y:19,r:2.2});
- const WC='#4a4050';L.wH(2,28,2,{col:WC,win:5});L.wH(2,28,22,{col:WC});L.wV(2,22,2,{col:WC,win:4});L.wV(2,22,28,{col:WC,win:4});L.wV(2,9.5,15,{col:WC});L.wV(14.5,22,15,{col:WC});
- for(const[x,y]of[[8,8],[8,15],[22,8],[22,15]])L.add('pillar',x,y);
- L.add('shelf',3.5,2.4);L.add('tv',6,2.4,{dead:false});L.add('sofa',4,11.5,{r:1,back:'s'});L.add('table',9.5,11,{w:1.4,d:.8,r:1});L.add('chair',11,5);L.add('chair',5.5,18.5);L.add('lamp',13.5,2.6);
- L.add('bed',23,2.4,{col:'#5a2f5f'});L.add('nstand',21.9,2.4);L.add('wardrobe',17,2.4);L.add('crate',26,19);L.add('plant',17,20);L.add('counter',19.5,2.4,{w:1.4,d:.6,col:'#4a3a30'});
- L.add('growth',22,11,{solid:false});L.add('growth',20.5,9.5,{solid:false});L.add('growth',23.5,12.5,{solid:false});L.add('growth',3,19,{solid:false});L.add('growth',26,4.5,{solid:false});L.add('growth',15.4,19.5,{solid:false});L.add('growth',4,4,{solid:false});
- L.spawn=[[4,20],[26,20],[26,4],[4,4]];
- L.pickup('med',20,20);L.pickup('med',4,3.5);L.pickup('anti',26.5,12);L.pickup('note',8,17,'A shattered framed photo from the beach — Maya, David, little Nancy. The crack in the glass runs straight across Maya\'s smiling face.');
- L.finish();L.start(6,18,5,19.3);
- const boss=new Enemy(L,'boss',22,11);L.boss=boss;L.enemies.push(boss);let intro=8,addT=12,storyBeat=0;
- L.bossPhase=ph=>{shake(16);SFX.roar();say(ph===2?'"David, run! Get away from me — I can’t stop my hands!"':'"Nancy… my sweet girl… don’t let it touch you. Forgive me."',4200,'#d68cff');banner(ph===2?'SHE FIGHTS IT':'THE BLOOM TAKES HOLD','#d68cff');for(let i=0;i<2;i++){const s=L.farSpawn(10);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}};
- L.onBossDead=()=>{say('"Thank you... it\'s finally quiet... David, promise me... don\'t let them touch Nancy..."',4500,'#d68cff');for(const e of L.enemies)if(e!==boss&&!e.dead)e.dead=true;L.win(3);};
- L.objText=()=>boss.awake?`MAYA — ${Math.max(0,Math.round(boss.hp/boss.max*100))}%`:'SOMETHING IS IN THE ROOM…';
+ const L=new Level(1,42,32,'grass'),D=DIFFS[S.difficulty];L.dark=.62;L.flicker=true;L.amb=[12,10,24];L.ui='#c870ff';
+ L.fl('grass',0,0,42,32);
+ L.fl('dark',4,3,20,29);
+ L.fl('carpet',20,3,38,29);
+ for(let y=2;y<30;y+=6){L.add('tree',1.8,y,{s:1.05,dead:true});L.add('tree',39.8,y,{s:1.05,dead:true});}
+ L.decal({t:'rug',x:7,y:14,w:6,d:5,c1:'#2a1030',c2:'#3a1840'});
+ L.decal({t:'bloom',x:31,y:16,r:4.8});L.decal({t:'bloom',x:23,y:10,r:3.2});L.decal({t:'bloom',x:28,y:23,r:3.4});L.decal({t:'bloom',x:11,y:22,r:2.6});L.decal({t:'bloom',x:8,y:8,r:2.4});
+ const WC='#4a4050';
+ L.wH(4,38,3,{col:WC,win:4});L.wH(4,38,29,{col:WC,win:4});
+ L.wV(3,29,4,{col:WC,win:3});L.wV(3,29,38,{col:WC,win:3});
+ L.wV(3,10,20,{col:WC});L.wV(15,19,20,{col:WC});L.wV(24,29,20,{col:WC});
+ for(const[x,y]of[[10,8],[10,16],[10,24],[26,8],[26,16],[26,24],[34,11],[34,21]])L.add('pillar',x,y);
+ L.add('shelf',5,3.4);L.add('shelf',15,3.4);L.add('tv',8,3.4,{dead:false});L.add('sofa',6,14,{r:1,back:'s'});L.add('table',12,14,{w:1.6,d:.9,r:1});L.add('chair',14,8);L.add('chair',7,21);L.add('lamp',17,3.5);
+ L.add('bed',33,4,{col:'#5a2f5f'});L.add('nstand',31.8,4);L.add('wardrobe',27,3.4);L.add('counter',22,3.4,{w:1.6,d:.7,col:'#4a3a30'});L.add('plant',36,26);L.add('crate',35,27);L.add('lamp',36,16);
+ L.add('growth',31,16,{solid:false});L.add('growth',29,14,{solid:false});L.add('growth',33,18,{solid:false});L.add('growth',22,25,{solid:false});L.add('growth',15,7,{solid:false});L.add('growth',6,26,{solid:false});
+ L.spawn=[[6,5],[17,26],[36,5],[36,26]];
+ L.pickup('med',7,6);L.pickup('med',35,25);L.pickup('anti',35,7);
+ L.pickup('note',11,19,'A shattered framed photo from the beach — Maya, David, little Nancy. The crack in the glass runs straight across Maya\'s smiling face.');
+ L.pickup('note',29,6,'Maya\'s field journal, written in trembling hand: "The spores sing in my ears at night. It sounds like the ocean... but when I look in the mirror, my reflection blinks after I do."');
+ L.finish();L.start(7,25,6,26.2);
+ const boss=new Enemy(L,'boss',31,16);L.boss=boss;L.enemies.push(boss);let intro=8,addT=16,storyBeat=0,barkCooldown=0;
+ L.onBossAim=()=>{if(barkCooldown<=0){barkCooldown=4.5;say(pick(['"RUN, DAVID! I CAN\'T HOLD MY ARMS BACK!"','"GET OUT OF THE WAY! IT\'S FORCING ME FORWARD!"','"DAVID, DUCK! DON\'T LET IT HIT YOU!"']),2400,'#d68cff');}};
+ L.onBossStun=()=>{shake(8);say('"David... while I can still feel your face... please... make it stop..."',3200,'#d68cff');setTimeout(()=>{if(!boss.dead)say('"Mama, please wake up! Papa, don\'t hurt her!"',2600,'#ffd34d');},1200);};
+ L.bossPhase=ph=>{shake(16);SFX.roar();if(ph===2){say('"David, run! Get Nancy out of here before the Bloom takes what\'s left of me!"',4400,'#d68cff');banner('SHE FIGHTS THE BLOOM','#d68cff');setTimeout(()=>{if(!boss.dead)say('"I\'m not leaving you behind to this nightmare, Maya!"',3200,'#e8dcae');},2000);setTimeout(()=>{if(!boss.dead)say('"Mama, you promised you\'d take me back to the tide pools!"',3000,'#ffd34d');},4200);const s=L.farSpawn(12);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}else{say('"Nancy… my sweet girl… take Papa\'s hand. Never let go of his hand…"',4600,'#d68cff');banner('THE BLOOM CONSUMES HER','#ff3656');setTimeout(()=>{if(!boss.dead)say('"Stay with us, Maya! Hold on to my voice!"',3400,'#e8dcae');},2000);const s=L.farSpawn(12);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}};
+ L.onBossDead=()=>{say('"The noise is finally fading... thank you, David... take our little girl and run..."',4800,'#d68cff');setTimeout(()=>{say('"Mama... no... Mama, don\'t go to sleep..."',3400,'#ffd34d');},2200);setTimeout(()=>{say('"Close your eyes, Nancy. Just hold onto me."',3200,'#e8dcae');},4500);for(const e of L.enemies)if(e!==boss&&!e.dead)e.dead=true;L.win(4);};
+ L.objText=()=>boss.awake?`MAYA MERCER — ${Math.max(0,Math.round(boss.hp/boss.max*100))}%`:'SOMETHING IS IN THE BEDROOM…';
  L.tick=dt=>{
+  barkCooldown-=dt;
   if(!boss.awake){
-   if(storyBeat===0){storyBeat=1;say('"Maya? It’s David. Nancy’s here — I’m getting her out."',3900,'#e8dcae');banner('A VOICE FROM THE BEDROOM','#c870ff');}
+   if(storyBeat===0){storyBeat=1;say('"Maya? It’s David. Nancy’s here — I came back for you."',3800,'#e8dcae');banner('A VOICE FROM THE MASTER BEDROOM','#c870ff');}
    intro-=dt;
-   if(intro<=4.8&&storyBeat===1){storyBeat=2;say('"David…? No. Stay back. Please, don’t let Nancy see me."',4200,'#d68cff');SFX.roar();}
-   if(intro<=0){boss.awake=true;boss.bs='walk';say('"I can hear her crying… I remember her laugh. David, I’m trying."',4300,'#d68cff');banner('MAYA IS STILL IN THERE','#d68cff');SFX.roar();}
+   if(intro<=4.8&&storyBeat===1){storyBeat=2;say('"David…? No. Stay back! Nancy, cover your eyes... please, don\'t look at me!"',4200,'#d68cff');SFX.roar();}
+   if(intro<=0){boss.awake=true;boss.bs='walk';say('"I can hear the waves… I remember her laugh. David, I\'m trying!"',4300,'#d68cff');banner('MAYA IS STILL IN THERE','#d68cff');SFX.roar();}
    return;
   }
-  if(!L.midBossBeat&&boss.hp<boss.max*.52){L.midBossBeat=true;say('"The thing keeps showing me the beach… our wedding… Nancy’s first steps. I can’t tell which memories are mine anymore!"',4800,'#d68cff');shake(5);}
-  if(!L.lastBossBeat&&boss.hp<boss.max*.2){L.lastBossBeat=true;say('"David, listen to me. When I stop moving, take Nancy and run. Don’t look back."',4600,'#d68cff');}
-  addT-=dt;if(addT<=0){addT=Math.max(8,18/D.hp);if(L.alive()<2+boss.phase){const s=L.farSpawn(10);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}}};
+  if(!L.midBossBeat&&boss.hp<boss.max*0.78){L.midBossBeat=true;say('"My hands... I can\'t control my own hands! David, stay behind the pillars!"',4200,'#d68cff');setTimeout(()=>{if(!boss.dead)say('"Mama, please stop! Don\'t hurt Papa!"',2800,'#ffd34d');},1800);}
+  if(!L.lastBossBeat&&boss.hp<boss.max*0.22){L.lastBossBeat=true;say('"David, listen to me. When I stop moving, take Nancy and run. Don\'t look back."',4600,'#d68cff');}
+  addT-=dt;if(addT<=0){addT=Math.max(12,22/D.hp);if(L.alive()<1+(boss.phase>1?1:0)){const s=L.farSpawn(12);L.spawnEnemy('drifter',s[0],s[1],{hunt:true});}}};
  return L;
 }
 function buildL3(){

@@ -155,7 +155,45 @@ async function run() {
   `);
   await new Promise(r => setTimeout(r, 400));
 
-  // 5. Chapter 3 Transition & B-Roll
+  // 5. Chapter 2 Transition & Maya Mercer Boss Encounter
+  console.log('[Test] Starting Chapter 2 (The Face I Loved)...');
+  await evalJs(`
+    startLevel(1);
+  `);
+  await new Promise(r => setTimeout(r, 1200));
+  const chapter2Check = await evalJs(`
+    JSON.stringify({
+      levelId: LV?.id,
+      width: LV?.w,
+      height: LV?.h,
+      hasBoss: !!LV?.boss,
+      bossHp: LV?.boss?.hp,
+      bossMax: LV?.boss?.max,
+      hasMayaSprite: typeof window.drawMayaSprite === 'function',
+      subOpacity: window.getComputedStyle(document.getElementById('sub')).opacity
+    })
+  `);
+  console.log('[Test] Chapter 2 Arena Status:', chapter2Check);
+  await takeScreenshot('verify_mega_ui_chapter2_maya.png');
+
+  // Trigger Maya combat bark
+  console.log('[Test] Triggering Maya dialogue bark...');
+  await evalJs(`
+    say('RUN, DAVID! I CANNOT HOLD MY ARMS BACK!', 4000, '#d68cff');
+  `);
+  await new Promise(r => setTimeout(r, 600));
+  const mayaDialogueCheck = await evalJs(`
+    JSON.stringify({
+      boxActive: document.querySelector('.bloom-dialogue-box')?.classList.contains('active'),
+      speaker: document.querySelector('.bloom-dialogue-header span')?.textContent,
+      role: document.querySelector('.bloom-dialogue-role')?.textContent,
+      text: document.querySelector('.bloom-dialogue-text')?.textContent
+    })
+  `);
+  console.log('[Test] Maya Dialogue Attribution:', mayaDialogueCheck);
+  await takeScreenshot('verify_mega_ui_maya_dialogue.png');
+
+  // 6. Chapter 3 Transition & B-Roll
   console.log('[Test] Starting Chapter 3 (Miles of Silence)...');
   await evalJs(`
     startLevel(2);
