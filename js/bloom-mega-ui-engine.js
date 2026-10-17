@@ -766,7 +766,39 @@
 
       '#sub {',
 
-      '  display: none !important;',
+      '  position: absolute !important;',
+
+      '  left: 50% !important;',
+
+      '  bottom: 44px !important;',
+
+      '  transform: translateX(-50%) !important;',
+
+      '  max-width: 76% !important;',
+
+      '  text-align: center !important;',
+
+      '  font-family: "Special Elite", serif !important;',
+
+      '  font-size: 18px !important;',
+
+      '  letter-spacing: 0.6px !important;',
+
+      '  line-height: 1.4 !important;',
+
+      '  color: #e8f3ec;',
+
+      '  text-shadow: 0 2px 6px #000, 0 0 14px #000, 0 0 24px #000, 1px 1px 2px #000 !important;',
+
+      '  pointer-events: none !important;',
+
+      '  z-index: 45 !important;',
+
+      '  opacity: 0;',
+
+      '  transition: opacity 0.35s ease !important;',
+
+      '  display: block !important;',
 
       '}',
 
@@ -836,159 +868,11 @@
 
       '}',
 
-      '/* Comic Book Dialogue Speech Balloon (Uniform Across Characters & Levels) */',
+      '/* In-Game Subtitle Text Only (No Popup Cards / Bubbles) */',
 
       '.bloom-dialogue-box {',
 
-      '  position: fixed;',
-
-      '  left: 50%;',
-
-      '  bottom: 74px;',
-
-      '  transform: translateX(-50%) translateY(8px);',
-
-      '  min-width: 320px;',
-
-      '  max-width: min(720px, 86vw);',
-
-      '  background: #ffffff;',
-
-      '  border: 3.5px solid #000000;',
-
-      '  border-radius: 6px;',
-
-      '  padding: 16px 20px 14px 20px;',
-
-      '  box-shadow: 6px 6px 0px #000000;',
-
-      '  pointer-events: none;',
-
-      '  z-index: 45;',
-
-      '  opacity: 0;',
-
-      '  transition: opacity 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28), transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);',
-
-      '}',
-
-      '.bloom-dialogue-box::before {',
-
-      '  content: "";',
-
-      '  position: absolute;',
-
-      '  bottom: -20px;',
-
-      '  left: 44px;',
-
-      '  width: 0;',
-
-      '  height: 0;',
-
-      '  border-style: solid;',
-
-      '  border-width: 20px 16px 0 0;',
-
-      '  border-color: #000000 transparent transparent transparent;',
-
-      '  z-index: 1;',
-
-      '}',
-
-      '.bloom-dialogue-box::after {',
-
-      '  content: "";',
-
-      '  position: absolute;',
-
-      '  bottom: -13px;',
-
-      '  left: 47px;',
-
-      '  width: 0;',
-
-      '  height: 0;',
-
-      '  border-style: solid;',
-
-      '  border-width: 14px 11px 0 0;',
-
-      '  border-color: #ffffff transparent transparent transparent;',
-
-      '  z-index: 2;',
-
-      '}',
-
-      '.bloom-dialogue-box.active {',
-
-      '  opacity: 1;',
-
-      '  transform: translateX(-50%) translateY(0);',
-
-      '}',
-
-      '.bloom-dialogue-header {',
-
-      '  position: absolute;',
-
-      '  top: -14px;',
-
-      '  left: 16px;',
-
-      '  display: inline-flex;',
-
-      '  align-items: center;',
-
-      '  background: var(--speaker-accent, #000000);',
-
-      '  color: #ffffff;',
-
-      '  padding: 1px 10px 2px 10px;',
-
-      '  border: 2.5px solid #000000;',
-
-      '  border-radius: 3px;',
-
-      '  box-shadow: 2.5px 2.5px 0px #000000;',
-
-      '  font-family: "Bangers", cursive, sans-serif;',
-
-      '  font-size: 14px;',
-
-      '  letter-spacing: 1.5px;',
-
-      '  text-transform: uppercase;',
-
-      '  z-index: 5;',
-
-      '}',
-
-      '.bloom-dialogue-role {',
-
-      '  display: none;',
-
-      '}',
-
-      '.bloom-dialogue-text {',
-
-      '  font-family: "Comic Neue", "Bangers", cursive, sans-serif;',
-
-      '  font-weight: 700;',
-
-      '  font-size: 18px;',
-
-      '  line-height: 1.35;',
-
-      '  color: #0a0a0a;',
-
-      '  letter-spacing: 0.3px;',
-
-      '  text-transform: uppercase;',
-
-      '  min-height: 24px;',
-
-      '  margin-top: 2px;',
+      '  display: none !important;',
 
       '}',
 
@@ -2653,7 +2537,11 @@
 
     if (legacySub) {
 
-      legacySub.textContent = profile.name + ': ' + this.dialogue.fullText;
+      legacySub.textContent = this.dialogue.fullText;
+
+      legacySub.style.color = profile.color || '#e8f3ec';
+
+      legacySub.style.opacity = '1';
 
     }
 
@@ -2834,6 +2722,10 @@
       if (this.dialogue.elapsed >= this.dialogue.duration) {
 
         this.dialogue.active = false;
+
+        var legacySub = typeof document !== 'undefined' ? document.getElementById('sub') : null;
+
+        if (legacySub) legacySub.style.opacity = '0';
 
         if (this._dialogueBoxEl) {
 

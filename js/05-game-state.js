@@ -6,24 +6,13 @@ const saveBst=(i,s)=>{if((bloomBst[i]|0)>=s)return false;bloomBst[i]=s;try{local
 let subTimer=0;
 function say(txt,ms,col){
  if(!S.subs&&!col)return;
- if(typeof window.BloomMegaUI!=='undefined'){
-  let spk='david';
-  if(col==='#d68cff'||col==='#c870ff'||/skull|burn|burning|wedding|crying|beach|sweet girl|hands|control|stop moving|quiet|promise me|stay back/i.test(txt)){
-   spk='maya';
-  }else if(col==='#ffd34d'||(/papa|daddy|mommy|mama/i.test(txt)&&!/stay behind|protect|don't look|close your eyes/i.test(txt))){
-   spk='nancy';
-  }else if(col==='#9ac8ff'||col==='#7dffb0'||col==='#e8dcae'){
-   spk='david';
-  }else if(/officer|broadcast|radio|dispatch|attention remaining/i.test(txt)){
-   spk='radio';
-  }else if(!col&&/wave|barricade|hold|protect|spore|bloom|sprint|stamina|stalker|tip/i.test(txt)){
-   spk='system';
-  }
-  BloomMegaUI.showDialogue(spk,txt,(ms||3800)/1000);
-  const el=$('sub');if(el)el.style.opacity=0;
- }else{
-  const el=$('sub');
-  if(el){el.textContent=txt;el.style.color=col||'';el.style.opacity=1;clearTimeout(subTimer);subTimer=setTimeout(()=>el.style.opacity=0,ms||3200);}
+ const el=$('sub');
+ if(el){
+  el.textContent=txt;
+  el.style.color=col||'#e8f3ec';
+  el.style.opacity=1;
+  clearTimeout(subTimer);
+  subTimer=setTimeout(()=>el.style.opacity=0,ms||3400);
  }
 }
 let banTimer=0;
