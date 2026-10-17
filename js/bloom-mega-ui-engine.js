@@ -836,7 +836,7 @@
 
       '}',
 
-      '/* Diegetic Subtitle Card (#sub + custom container) */',
+      '/* Comic Book Dialogue Speech Balloon (Uniform Across Characters & Levels) */',
 
       '.bloom-dialogue-box {',
 
@@ -844,23 +844,23 @@
 
       '  left: 50%;',
 
-      '  bottom: 64px;',
+      '  bottom: 74px;',
 
-      '  transform: translateX(-50%);',
+      '  transform: translateX(-50%) translateY(8px);',
 
-      '  min-width: 340px;',
+      '  min-width: 320px;',
 
-      '  max-width: min(740px, 88vw);',
+      '  max-width: min(720px, 86vw);',
 
-      '  background: linear-gradient(180deg, rgba(10, 12, 12, 0.92) 0%, rgba(6, 7, 8, 0.96) 100%);',
+      '  background: #ffffff;',
 
-      '  border: 1px solid rgba(156, 146, 122, 0.34);',
+      '  border: 3.5px solid #000000;',
 
-      '  border-left: 3px solid var(--speaker-accent, #8c7a5b);',
+      '  border-radius: 6px;',
 
-      '  padding: 12px 18px 14px 18px;',
+      '  padding: 16px 20px 14px 20px;',
 
-      '  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85), inset 0 0 22px rgba(0, 0, 0, 0.7);',
+      '  box-shadow: 6px 6px 0px #000000;',
 
       '  pointer-events: none;',
 
@@ -868,7 +868,55 @@
 
       '  opacity: 0;',
 
-      '  transition: opacity 0.25s ease, transform 0.25s ease;',
+      '  transition: opacity 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28), transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);',
+
+      '}',
+
+      '.bloom-dialogue-box::before {',
+
+      '  content: "";',
+
+      '  position: absolute;',
+
+      '  bottom: -20px;',
+
+      '  left: 44px;',
+
+      '  width: 0;',
+
+      '  height: 0;',
+
+      '  border-style: solid;',
+
+      '  border-width: 20px 16px 0 0;',
+
+      '  border-color: #000000 transparent transparent transparent;',
+
+      '  z-index: 1;',
+
+      '}',
+
+      '.bloom-dialogue-box::after {',
+
+      '  content: "";',
+
+      '  position: absolute;',
+
+      '  bottom: -13px;',
+
+      '  left: 47px;',
+
+      '  width: 0;',
+
+      '  height: 0;',
+
+      '  border-style: solid;',
+
+      '  border-width: 14px 11px 0 0;',
+
+      '  border-color: #ffffff transparent transparent transparent;',
+
+      '  z-index: 2;',
 
       '}',
 
@@ -882,45 +930,65 @@
 
       '.bloom-dialogue-header {',
 
-      '  display: flex;',
+      '  position: absolute;',
 
-      '  justify-content: space-between;',
+      '  top: -14px;',
 
-      '  align-items: baseline;',
+      '  left: 16px;',
 
-      '  margin-bottom: 5px;',
+      '  display: inline-flex;',
 
-      '  font-family: "Share Tech Mono", monospace;',
+      '  align-items: center;',
 
-      '  font-size: 11px;',
+      '  background: var(--speaker-accent, #000000);',
 
-      '  letter-spacing: 1.8px;',
+      '  color: #ffffff;',
 
-      '  color: var(--speaker-color, #d4c5a9);',
+      '  padding: 1px 10px 2px 10px;',
+
+      '  border: 2.5px solid #000000;',
+
+      '  border-radius: 3px;',
+
+      '  box-shadow: 2.5px 2.5px 0px #000000;',
+
+      '  font-family: "Bangers", cursive, sans-serif;',
+
+      '  font-size: 14px;',
+
+      '  letter-spacing: 1.5px;',
+
+      '  text-transform: uppercase;',
+
+      '  z-index: 5;',
 
       '}',
 
       '.bloom-dialogue-role {',
 
-      '  font-size: 9px;',
-
-      '  color: rgba(160, 165, 160, 0.55);',
+      '  display: none;',
 
       '}',
 
       '.bloom-dialogue-text {',
 
-      '  font-family: "Special Elite", "Courier New", monospace;',
+      '  font-family: "Comic Neue", "Bangers", cursive, sans-serif;',
 
-      '  font-size: 15px;',
+      '  font-weight: 700;',
 
-      '  line-height: 1.48;',
+      '  font-size: 18px;',
 
-      '  color: #e4e0d5;',
+      '  line-height: 1.35;',
 
-      '  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);',
+      '  color: #0a0a0a;',
 
-      '  min-height: 22px;',
+      '  letter-spacing: 0.3px;',
+
+      '  text-transform: uppercase;',
+
+      '  min-height: 24px;',
+
+      '  margin-top: 2px;',
 
       '}',
 
