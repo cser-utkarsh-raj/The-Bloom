@@ -4,7 +4,19 @@ function newGame(){return{score:0,honour:100,hp:100,maxHp:100,meds:DIFFS[S.diffi
 let bloomBst={};try{bloomBst=JSON.parse(localStorage.getItem('bloomBst')||'{}')||{};}catch(e){bloomBst={};}
 const saveBst=(i,s)=>{if((bloomBst[i]|0)>=s)return false;bloomBst[i]=s;try{localStorage.setItem('bloomBst',JSON.stringify(bloomBst));}catch(e){}return true;};
 let subTimer=0;
-function say(txt,ms,col){if(!S.subs&&!col)return;const el=$('sub');el.textContent=txt;el.style.color=col||'';el.style.opacity=1;clearTimeout(subTimer);subTimer=setTimeout(()=>el.style.opacity=0,ms||3200);}
+function say(txt,ms,col){
+ if(!S.subs&&!col)return;
+ const el=$('sub');el.textContent=txt;el.style.color=col||'';el.style.opacity=1;clearTimeout(subTimer);subTimer=setTimeout(()=>el.style.opacity=0,ms||3200);
+ if(typeof window.BloomMegaUI!=='undefined'){
+  let spk='david';
+  if(txt.startsWith('"')&&/papa|daddy|father|where|cold|scared/i.test(txt))spk='nancy';
+  else if(/maya|wife/i.test(txt)&&txt.startsWith('"'))spk='maya';
+  else if(/officer|broadcast|radio|dispatch/i.test(txt))spk='radio';
+  else if(!col&&/wave|barricade|hold|protect|spore|bloom|sprint|stamina|stalker|tip/i.test(txt))spk='system';
+  else if(col==='#ffd34d')spk='nancy';
+  BloomMegaUI.showDialogue(spk,txt,(ms||3500)/1000);
+ }
+}
 let banTimer=0;
 function banner(txt,col){const b=$('banner');b.textContent=txt;b.style.color=col||'#ff5a5a';b.style.opacity=1;clearTimeout(banTimer);banTimer=setTimeout(()=>b.style.opacity=0,1700);}
 const cache={};
@@ -42,8 +54,22 @@ function startLevel(i){
  $('ov').style.display='none';$('hud').style.display='block';ovAnim=null;
  portraits();Object.keys(cache).forEach(k=>delete cache[k]);
  $('help').innerHTML=document.body.classList.contains('mobile')?'<b>TOUCH &amp; HOLD</b> move toward your finger &nbsp; <b>DOUBLE-TAP</b> attack<br><b>MAP</b> big map &nbsp; <b>II</b> pause &nbsp; <b>H</b> hide help':'<b>WASD / ARROWS</b> move &nbsp; <b>SPACE</b> attack (or click)<br><b>SHIFT</b> sprint &nbsp; <b>F</b> dodge roll &nbsp; <b>Q</b> medkit<br><b>E</b> carry Nancy &nbsp; <b>M</b> map &nbsp; <b>P</b> pause &nbsp; <b>H</b> hide help';
- helpShown=i===0?12:5;$('help').style.opacity=1;
- banner(INTRO[i].t,LV.ui||THEMES[S.theme].acc);say(INTRO[i].tip,4500);
+ if(typeof window.BloomMegaUI!=='undefined'){
+  const subs=['QUARANTINE RESIDENCE // LIVING ROOM DEFENCE','CEDAR RIDGE // THE FACE I LOVED','ROUTE 101 // HIGHWAY OF ASH','ST. JUDE HIGH SCHOOL // CIVILIAN EVAC HUB','OPERATION SCORCHED SHORE // BUNKER 7'];
+  const collages=['evac_map','medical_dossier','quarantine_flyer','family_polaroid','family_polaroid'];
+  BloomMegaUI.playChapterIntro({
+   chapterNumber:'CHAPTER '+['I','II','III','IV','V'][i],
+   title:INTRO[i].t.toUpperCase(),
+   subtitle:subs[i]||'QUARANTINE ZONE',
+   timestamp:'OCT 14 // '+['02:18','04:41','06:12','09:05','11:58'][i]+' HRS',
+   epigraph:INTRO[i].txt?'“'+INTRO[i].txt.split('.')[0]+'.”':'',
+   collageType:collages[i]||'evac_map',
+   duration:5.8
+  });
+ } else {
+  banner(INTRO[i].t,LV.ui||THEMES[S.theme].acc);
+ }
+ say(INTRO[i].tip,4500);
 }
 function levelDone(){G.trust=LV.daughter.trust;unlocked=Math.max(unlocked,G.level+1);try{localStorage.setItem('bloomU2',unlocked);}catch(e){}saveBst(G.level,G.score);if(G.level>=4)showEnding();else showShop(G.level+1);}
 function gameOver(msg){state='over';$('hud').style.display='none';const nb=saveBst(G.level,G.score),best=bloomBst[G.level]|0;

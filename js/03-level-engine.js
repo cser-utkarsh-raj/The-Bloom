@@ -80,7 +80,22 @@ class Level{
   this.enemies=this.enemies.filter(e=>!e.dead);
   const p=this.player;
   for(const k of this.pick){if(k.got)continue;if(dst(k.x,k.y,p.x,p.y)<.75){k.got=true;SFX.pick();
-   if(k.k==='med'){G.meds++;this.fl(k.x,k.y,'+MEDKIT','#7dffb0');}else if(k.k==='anti'){G.infect=Math.max(0,G.infect-30);this.fl(k.x,k.y,'-INFECTION','#6ad8ff');}else{say(k.txt,6000,'#e8dcae');this.fl(k.x,k.y,'NOTE','#e8dcae');}}}
+   if(k.k==='med'){G.meds++;this.fl(k.x,k.y,'+MEDKIT','#7dffb0');}else if(k.k==='anti'){G.infect=Math.max(0,G.infect-30);this.fl(k.x,k.y,'-INFECTION','#6ad8ff');}else{
+    say(k.txt,6000,'#e8dcae');this.fl(k.x,k.y,'NOTE','#e8dcae');
+    if(typeof window.BloomMegaUI!=='undefined'){
+     BloomMegaUI.inspectItem({
+      id:'field_note_'+(G?G.level:0),
+      title:'RECOVERED SURVIVOR NOTE',
+      category:'ARCHIVAL EVIDENCE // SECTOR '+(G?(G.level+1):1),
+      date:'OCTOBER 14 // RECENT',
+      paperStyle:G&&G.level===1?'clinical':G&&G.level===3?'bulletin':'field',
+      stainType:'blood_and_coffee',
+      badgeCode:'NOTE-0'+(G?(G.level+1):1),
+      body:k.txt,
+      transcript:k.txt
+     });
+    }
+   }}}
   for(const d of this.decals)if(d.t==='bloom'){const q=dst(p.x,p.y,d.x,d.y);if(q<d.r*.85){G.infect=Math.min(100,G.infect+2.6*dt);if(!this.spW){this.spW=1;say('The spores are suffocating here. Keep Nancy clear of the fungal bloom.', 3200, '#6ad8ff');}}}
   G.infect=Math.min(100,G.infect+.07*dt);
   if(G.infect>55&&Math.random()<dt*.15&&this.ghosts.length<3){const a=rnd(0,6.28),r=rnd(4,7);this.ghosts.push({x:p.x+Math.cos(a)*r,y:p.y+Math.sin(a)*r,t:2.4});if(Math.random()<.5)say(pick(['"...David... why did you leave me...?"', '"David... come into the water..."', '"Do you hear the spores calling...?"']), 2200, '#9be8ff');}
@@ -111,8 +126,15 @@ class Level{
  }
  /* ---------- rendering ---------- */
  draw(){
-  Z=Math.max(.55,Math.min(1.6,Math.min(W/1280,H/720)))*S.zoom;EDGE=S.gfx!=='low';
-  shk*=.86;if(shk<.2)shk=0;const sx=(Math.random()-.5)*shk*2,sy=(Math.random()-.5)*shk*2;CX=camX+sx;CY=camY+sy;
+  let camBonus = 0, camOffX = 0, camOffY = 0;
+  if(typeof window.BloomMegaUI !== 'undefined'){
+   const ctf = BloomMegaUI.getCameraTransformOffset();
+   camBonus = ctf.zoomBonus || 0;
+   camOffX = ctf.offsetX || 0;
+   camOffY = ctf.offsetY || 0;
+  }
+  Z=Math.max(.55,Math.min(1.6,Math.min(W/1280,H/720)))*S.zoom*(1 + camBonus);EDGE=S.gfx!=='low';
+  shk*=.86;if(shk<.2)shk=0;const sx=(Math.random()-.5)*shk*2,sy=(Math.random()-.5)*shk*2;CX=camX+sx+camOffX;CY=camY+sy+camOffY;
   setScreen();cx.fillStyle='#05090b';cx.fillRect(0,0,W,H);
   setWorld();LIGHTS.length=0;
   const hw=W/2/Z+110,hh=H/2/Z+170,p=this.player,pk=p.x+p.y;

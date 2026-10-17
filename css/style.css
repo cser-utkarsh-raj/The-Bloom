@@ -15,7 +15,7 @@ canvas#c{position:fixed;inset:0;display:block}
 #boss{display:none;margin-top:6px;background:rgba(10,0,16,.8);border:1px solid #4a1a66;padding:4px 10px}#boss .bar{width:100%}
 #sc{position:absolute;right:16px;top:12px;text-align:right;background:rgba(0,0,0,.58);padding:6px 14px;border:1px solid rgba(255,255,255,.09)}
 #sc b{display:block;font-size:22px;color:#ffd34d}#sc span{font-size:9px;letter-spacing:3px;color:var(--dim)}
-#prompt{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);font-size:13px;letter-spacing:3px;color:var(--acc);text-shadow:0 0 8px #000}
+#prompt{position:absolute;left:50%;bottom:148px;transform:translateX(-50%);font-size:13px;letter-spacing:3px;color:var(--acc);text-shadow:0 0 8px #000}
 #sub{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);max-width:70%;text-align:center;font-family:'Special Elite',serif;font-size:17px;color:#e8f3ec;text-shadow:0 2px 6px #000,0 0 14px #000;opacity:0;transition:opacity .4s}
 #help{position:absolute;left:14px;bottom:14px;font-size:11px;line-height:1.7;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.1);padding:8px 12px;color:#9cb8a8;transition:opacity .4s}#help b{color:var(--acc);font-weight:normal}
 #hurt{position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(200,0,0,.55) 100%);transition:opacity .25s}

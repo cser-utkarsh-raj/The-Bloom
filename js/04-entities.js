@@ -51,6 +51,7 @@ class Player{
   else say('Nancy is out of reach.', 1500);}
  hurt(d,ang){const lv=this.lv;if(this.inv>0||lv.over)return;if(!Number.isFinite(d)||d<=0)d=1;G.hp-=d;this.inv=.55;this.hurtT=.25;G.infect=Math.min(100,G.infect+1.5);SFX.hurt();shake(7);
   const h=$('hurt');h.style.opacity=1;setTimeout(()=>h.style.opacity=0,220);
+  if(typeof window.BloomMegaUI!=='undefined'){BloomMegaUI.triggerCameraImpulse('hit',Math.min(1.5,d/20));BloomMegaUI.triggerGlitch(0.45,0.25);}
   for(let i=0;i<8;i++)lv.part(this.x,this.y,.9,rnd(-2,2),rnd(-2,2),rnd(1,3),.5,'#a01010',2.5);lv.moveEnt(this,Math.cos(ang||0)*.3,Math.sin(ang||0)*.3);
   if(G.hp<=0){G.hp=0;lv.fail('David has fallen.');}}
 }
@@ -92,7 +93,9 @@ class Daughter{
   }
   this.lx=this.x;this.ly=this.y;
   if(this.trust<30&&near&&Math.random()<dt*.2)say('"Papa… I\'m scared…"',2200,'#ffd34d');}
- hurt(d){if(this.carried||this.lv.over)return;if(!Number.isFinite(d)||d<=0)d=1;this.hp-=d;this.hT=2;this.trust=Math.max(0,this.trust-6);SFX.hurt();this.lv.fl(this.x,this.y,'-'+Math.round(d),'#ffd34d');if(this.hp<=0){this.hp=0;this.lv.fail('Nancy is gone.');}}
+ hurt(d){if(this.carried||this.lv.over)return;if(!Number.isFinite(d)||d<=0)d=1;this.hp-=d;this.hT=2;this.scared=2.5;this.trust=Math.max(0,this.trust-6);SFX.hurt();this.lv.fl(this.x,this.y,'-'+Math.round(d),'#ffd34d');
+  if(typeof window.BloomMegaUI!=='undefined'){BloomMegaUI.triggerCameraImpulse('nancy_panic',1.0);}
+  if(this.hp<=0){this.hp=0;this.lv.fail('Nancy is gone.');}}
 }
 
 /* ---------- enemies ---------- */
@@ -149,7 +152,7 @@ class Enemy{
     if(!this.hitDone&&dst(this.x,this.y,p.x,p.y)<this.r+p.r+.35){this.hitDone=true;p.hurt(this.dmg*1.4,Math.atan2(this.diry,this.dirx));}
     if(Math.hypot(this.x-ox,this.y-oy)<11*dt*.3){this.bs='stun';this.bt=1.4;shake(12);lv.fl(this.x,this.y,'STUNNED','#ffd34d');}else if(this.bt<=0){this.bs='recover';this.bt=.7;}break;}
    case'stun':case'recover':if(this.bt<=0)this.bs='walk';break;
-   case'scream':if(this.bt<=0){shake(10);if(dp<4.2)p.hurt(this.dmg*.7,face);for(let i=0;i<20;i++)lv.part(this.x,this.y,.8,rnd(-6,6),rnd(-6,6),rnd(0,2),.6,'#e060ff',3,false);this.bs='recover';this.bt=.8;}break;}
+   case'scream':if(this.bt<=0){shake(10);if(typeof window.BloomMegaUI!=='undefined'){BloomMegaUI.triggerCameraImpulse('enemy_spotted',1.2);BloomMegaUI.triggerGlitch(0.6,0.3);}if(dp<4.2)p.hurt(this.dmg*.7,face);for(let i=0;i<20;i++)lv.part(this.x,this.y,.8,rnd(-6,6),rnd(-6,6),rnd(0,2),.6,'#e060ff',3,false);this.bs='recover';this.bt=.8;}break;}
  }
  hurt(d,ang,nokb){
   if(this.dead||this.dying)return;if(!Number.isFinite(d)||d<=0)d=1;/* NaN/undefined damage used to silently softlock fights */
