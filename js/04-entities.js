@@ -33,9 +33,24 @@ class Player{
   const lv=this.lv;let ang=this.f;if(useMouse){const w=s2w(this.aimX,this.aimY);ang=Math.atan2(w.y-this.y,w.x-this.x);}
   if(S.assist){let best=null,bd=3.4;for(const e of lv.enemies){if(e.dead||e.dying||(e.type==='boss'&&!e.awake))continue;const d=dst(this.x,this.y,e.x,e.y),a=Math.atan2(e.y-this.y,e.x-this.x);if(d<bd&&(Math.abs(angD(a,ang))<1.3||d<2.2)){bd=d;best=a;}}if(best!==null)ang=best;}
   this.f=ang;this.swA=ang;this.atkT=.4;this.swT=.2;SFX.swing();lv.noise(this.x,this.y,7);
-  const dmg=(30+rnd(-6,8))*(1+G.dmgUp*.15);let hits=0;
-  for(const e of lv.enemies){if(e.dead||e.dying)continue;const d=dst(this.x,this.y,e.x,e.y)-e.r;if(d<1.9&&Math.abs(angD(Math.atan2(e.y-this.y,e.x-this.x),ang))<1.2){e.hurt(dmg,ang);hits++;}}
-  if(hits){shake(3);}
+  const dmg=(30+rnd(-6,8))*(1+G.dmgUp*.15);let hits=0,parried=false;
+  for(const e of lv.enemies){
+   if(e.dead||e.dying)continue;
+   const d=dst(this.x,this.y,e.x,e.y)-e.r;
+   if(d<1.9&&Math.abs(angD(Math.atan2(e.y-this.y,e.x-this.x),ang))<1.2){
+    if(e.wind>0){
+     parried=true;e.wind=0;e.stun=Math.max(e.stun||0,0.5);
+     for(let i=0;i<8;i++)lv.part(e.x,e.y,0.9,Math.cos(ang+rnd(-1,1))*rnd(2,5),Math.sin(ang+rnd(-1,1))*rnd(2,5),rnd(1,3),0.35,'#ffea50',2.5,false);
+     lv.fl(e.x,e.y,'INTERRUPT!','#4dffa0');
+    }
+    e.hurt(dmg*(parried?1.35:1),ang);hits++;
+   }
+  }
+  if(parried){
+   if(SFX.parry)SFX.parry();
+   shake(8);
+   if(typeof window.BloomMegaUI!=='undefined')BloomMegaUI.triggerCameraImpulse('parry',0.9);
+  }else if(hits){shake(3);}
  }
  useMed(){
   const lv=this.lv,dd=lv.daughter;if(this.healCd>0)return;if(G.meds<=0){say('No first-aid supplies remaining.', 1800);return;}
@@ -56,11 +71,12 @@ class Player{
   if(G.hp<=0){G.hp=0;lv.fail('David has fallen.');}}
 }
 class Daughter{
- constructor(lv,x,y){Object.assign(this,{lv,x,y,r:.25,max:Math.round(100*(S.difficulty==='story'?1.3:1)),carried:false,trust:G.trust,ph:0,scared:0,f:0,hT:0,lx:x,ly:y,stuckT:0,warnT:0});this.hp=this.max;}
- update(dt){const lv=this.lv,p=lv.player;this.hT-=dt;this.warnT-=dt;if(this.carried){this.x=p.x;this.y=p.y;this.trust=Math.min(100,this.trust+dt*2);this.lx=this.x;this.ly=this.y;return;}
+ constructor(lv,x,y){Object.assign(this,{lv,x,y,r:.25,max:Math.round(100*(S.difficulty==='story'?1.3:1)),carried:false,trust:G.trust,ph:0,scared:0,f:0,hT:0,lx:x,ly:y,stuckT:0,warnT:0,crouch:false});this.hp=this.max;}
+ update(dt){const lv=this.lv,p=lv.player;this.hT-=dt;this.warnT-=dt;if(this.carried){this.x=p.x;this.y=p.y;this.trust=Math.min(100,this.trust+dt*2);this.lx=this.x;this.ly=this.y;this.crouch=false;return;}
   if(lv.hitSolid(this.x,this.y,this.r)){const pa=Math.atan2(p.y-this.y,p.x-this.x);for(let k=1;k<=8;k++){const ang=pa+(k%2?1:-1)*Math.floor(k/2)*0.6;const qx=this.x+Math.cos(ang)*0.45,qy=this.y+Math.sin(ang)*0.45;if(!lv.hitSolid(qx,qy,this.r)){this.x=qx;this.y=qy;break;}}}
-  const d=dst(this.x,this.y,p.x,p.y);let near=false;for(const e of lv.enemies)if(!e.dead&&e.state==='chase'&&dst(e.x,e.y,this.x,this.y)<5){near=true;break;}
+  const d=dst(this.x,this.y,p.x,p.y);let near=false;for(const e of lv.enemies)if(!e.dead&&e.state==='chase'&&dst(e.x,e.y,this.x,this.y)<5.5){near=true;break;}
   this.scared=near?Math.min(1,this.scared+dt*2):Math.max(0,this.scared-dt);
+  this.crouch=Boolean(near||this.scared>0.35||(p.still&&d<2.2&&!this.carried));
   if(d<3.2)this.trust=Math.min(100,this.trust+dt*1.2);else if(d>11)this.trust=Math.max(0,this.trust-dt*1.5);
   const stay=this.scared>.5?1.2:1.6;
   if(d>stay){
@@ -150,7 +166,36 @@ class Enemy{
    case'aim':{if(this.bt>.6){const a=Math.atan2(p.y-this.y,p.x-this.x);this.dirx=Math.cos(a);this.diry=Math.sin(a);this.f=a;}if(this.bt<=0){this.bs='charge';this.bt=.6;this.hitDone=false;SFX.roar();}break;}
    case'charge':{const ox=this.x,oy=this.y;lv.moveEnt(this,this.dirx*9.5*dt,this.diry*9.5*dt);this.ph+=dt*14;
     if(!this.hitDone&&dst(this.x,this.y,p.x,p.y)<this.r+p.r+.35){this.hitDone=true;p.hurt(this.dmg*1.3,Math.atan2(this.diry,this.dirx));}
-    if(Math.hypot(this.x-ox,this.y-oy)<9.5*dt*.3){this.bs='stun';this.bt=2.6;shake(12);lv.fl(this.x,this.y,'STUNNED','#ffd34d');if(typeof lv.onBossStun==='function')lv.onBossStun();}else if(this.bt<=0){this.bs='recover';this.bt=.7;}break;}
+    if(Math.hypot(this.x-ox,this.y-oy)<9.5*dt*.3){
+     this.bs='stun';this.bt=2.8;shake(20);lv.fl(this.x,this.y,'STUNNED','#ffd34d');
+     if(lv._bloomWorldData&&lv._bloomWorldData.props){
+      for(const prop of lv._bloomWorldData.props){
+       if(prop.type==='stone_pillar'&&dst(this.x,this.y,prop.x,prop.y)<2.8){
+        prop.variant=1;
+        if(SFX.stoneCrunch)SFX.stoneCrunch();else SFX.boom();
+        lv.fl(prop.x,prop.y,'PILLAR SHATTERED!','#ffdd66');
+        for(let k=0;k<22;k++)lv.part(prop.x,prop.y,rnd(0.2,1.2),rnd(-4,4),rnd(-4,4),rnd(1,4),0.85,'#8c9094',rnd(2,5),true);
+        if(lv._bloomWorldData.decals){
+         lv._bloomWorldData.decals.push({type:'shattered_glass',x:prop.x,y:prop.y,radius:1.5,alpha:0.85});
+        }
+        break;
+       }
+      }
+     }
+     if(lv.props){
+      for(const prop of lv.props){
+       if(prop.k==='pillar'&&dst(this.x,this.y,prop.cx,prop.cy)<2.8){
+        prop.fractured=true;
+        if(SFX.stoneCrunch)SFX.stoneCrunch();else SFX.boom();
+        lv.fl(prop.cx,prop.cy,'PILLAR SHATTERED!','#ffdd66');
+        for(let k=0;k<22;k++)lv.part(prop.cx,prop.cy,rnd(0.2,1.2),rnd(-4,4),rnd(-4,4),rnd(1,4),0.85,'#8c9094',rnd(2,5),true);
+        break;
+       }
+      }
+     }
+     if(typeof window.BloomMegaUI!=='undefined'){BloomMegaUI.triggerCameraImpulse('enemy_spotted',1.4);BloomMegaUI.triggerGlitch(0.5,0.25);}
+     if(typeof lv.onBossStun==='function')lv.onBossStun();
+    }else if(this.bt<=0){this.bs='recover';this.bt=.7;}break;}
    case'stun':case'recover':if(this.bt<=0)this.bs='walk';break;
    case'scream':if(this.bt<=0){shake(10);if(typeof window.BloomMegaUI!=='undefined'){BloomMegaUI.triggerCameraImpulse('enemy_spotted',1.2);BloomMegaUI.triggerGlitch(0.6,0.3);}if(dp<4.2)p.hurt(this.dmg*.7,face);for(let i=0;i<20;i++)lv.part(this.x,this.y,.8,rnd(-6,6),rnd(-6,6),rnd(0,2),.6,'#e060ff',3,false);this.bs='recover';this.bt=.8;}break;}
  }

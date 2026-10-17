@@ -48,10 +48,64 @@ function audioInit(){
   NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
  }catch(e){AC=null;}
 }
-function setVol(){if(MG)MG.gain.value=S.volume;}
+function setVol(){if(MG)MG.gain.value=S.volume;if(FOLEY&&FOLEY.level>=0)updateFoleyForLevel(FOLEY.level);}
 function tone(f,dur,type,vol,slide){if(!AC)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,f+slide),t+dur);g.gain.setValueAtTime(vol||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(MG);o.start(t);o.stop(t+dur+.02);}
 function nz(dur,vol,fq){if(!AC)return;const t=AC.currentTime,s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;f.type='bandpass';f.frequency.value=fq||1000;g.gain.setValueAtTime(vol||.15,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(MG);s.start(t,Math.random()*.5,dur);}
-const SFX={swing:()=>nz(.12,.1,2500),hit:()=>{tone(130,.14,'square',.1,-70);nz(.1,.12,700);},hurt:()=>tone(95,.28,'sawtooth',.18,-45),kill:()=>nz(.2,.12,400),heal:()=>tone(520,.2,'sine',.12,260),pick:()=>tone(760,.12,'triangle',.1,300),boom:()=>{nz(.8,.35,150);tone(60,.8,'sine',.3,-30);},roar:()=>tone(110,.9,'sawtooth',.16,-60),shell:()=>tone(900,.8,'sine',.05,-700),shot:()=>{nz(.12,.2,1800);tone(300,.1,'square',.08,-200);}};
+const SFX={swing:()=>nz(.12,.1,2500),hit:()=>{tone(130,.14,'square',.1,-70);nz(.1,.12,700);},hurt:()=>tone(95,.28,'sawtooth',.18,-45),kill:()=>nz(.2,.12,400),heal:()=>tone(520,.2,'sine',.12,260),pick:()=>tone(760,.12,'triangle',.1,300),boom:()=>{nz(.8,.35,150);tone(60,.8,'sine',.3,-30);},roar:()=>tone(110,.9,'sawtooth',.16,-60),shell:()=>tone(900,.8,'sine',.05,-700),shot:()=>{nz(.12,.2,1800);tone(300,.1,'square',.08,-200);},parry:()=>{tone(880,.12,'triangle',.18);tone(1320,.14,'sine',.14);nz(.08,.15,3200);},stoneCrunch:()=>{nz(.65,.4,220);tone(70,.5,'triangle',.28,-35);}};
+
+/* ---------- CHAPTER ENVIRONMENTAL FOLEY AUDIO BEDS ---------- */
+const FOLEY={source:null,filter:null,gain:null,subOsc:null,subGain:null,level:-1,timer:null};
+function updateFoleyForLevel(lvl){
+ audioInit();if(!AC||!MG)return;
+ FOLEY.level=lvl;
+ if(!FOLEY.gain){
+  FOLEY.gain=AC.createGain();FOLEY.gain.gain.value=0.0001;FOLEY.gain.connect(MG);
+  FOLEY.filter=AC.createBiquadFilter();FOLEY.filter.connect(FOLEY.gain);
+  FOLEY.source=AC.createBufferSource();FOLEY.source.buffer=NB;FOLEY.source.loop=true;
+  FOLEY.source.connect(FOLEY.filter);try{FOLEY.source.start();}catch(e){}
+  FOLEY.subOsc=AC.createOscillator();FOLEY.subGain=AC.createGain();
+  FOLEY.subGain.gain.value=0.0001;FOLEY.subOsc.type='sine';FOLEY.subOsc.frequency.value=45;
+  FOLEY.subOsc.connect(FOLEY.subGain);FOLEY.subGain.connect(MG);try{FOLEY.subOsc.start();}catch(e){}
+  if(!FOLEY.timer){
+   FOLEY.timer=setInterval(()=>{
+    if(!AC||!MG||state!=='play'||S.volume<=0.001)return;
+    const now=AC.currentTime;
+    if(FOLEY.level===2&&Math.random()<0.45){
+     FOLEY.subGain.gain.setValueAtTime(S.volume*0.09,now);
+     FOLEY.subGain.gain.exponentialRampToValueAtTime(0.0001,now+3.2);
+    }else if(FOLEY.level===4&&Math.random()<0.5){
+     FOLEY.subGain.gain.setValueAtTime(S.volume*0.14,now);
+     FOLEY.subGain.gain.exponentialRampToValueAtTime(0.0001,now+1.8);
+    }
+   },4500);
+  }
+ }
+ const now=AC.currentTime,vol=S.volume*0.06;
+ if(state!=='play'||S.volume<=0.001){
+  FOLEY.gain.gain.setTargetAtTime(0.0001,now,0.5);
+  FOLEY.subGain.gain.setTargetAtTime(0.0001,now,0.5);
+  return;
+ }
+ if(lvl===0){
+  FOLEY.filter.type='bandpass';FOLEY.filter.frequency.setTargetAtTime(1600,now,0.8);FOLEY.filter.Q.value=1.5;
+  FOLEY.gain.gain.setTargetAtTime(vol*0.8,now,0.8);FOLEY.subGain.gain.setTargetAtTime(0.0001,now,0.5);
+ }else if(lvl===1){
+  FOLEY.filter.type='lowpass';FOLEY.filter.frequency.setTargetAtTime(320,now,1.0);FOLEY.filter.Q.value=2.4;
+  FOLEY.gain.gain.setTargetAtTime(vol*0.7,now,0.8);FOLEY.subGain.gain.setTargetAtTime(0.0001,now,0.5);
+ }else if(lvl===2){
+  FOLEY.filter.type='bandpass';FOLEY.filter.frequency.setTargetAtTime(450,now,0.8);FOLEY.filter.Q.value=1.2;
+  FOLEY.gain.gain.setTargetAtTime(vol*1.1,now,0.8);FOLEY.subOsc.frequency.setValueAtTime(42,now);
+  FOLEY.subGain.gain.setTargetAtTime(vol*0.4,now,0.8);
+ }else if(lvl===3){
+  FOLEY.filter.type='bandpass';FOLEY.filter.frequency.setTargetAtTime(120,now,0.5);FOLEY.filter.Q.value=8.0;
+  FOLEY.gain.gain.setTargetAtTime(vol*0.9,now,0.8);FOLEY.subOsc.frequency.setValueAtTime(60,now);
+  FOLEY.subGain.gain.setTargetAtTime(vol*0.35,now,0.8);
+ }else{
+  FOLEY.filter.type='lowpass';FOLEY.filter.frequency.setTargetAtTime(220,now,0.8);FOLEY.filter.Q.value=1.2;
+  FOLEY.gain.gain.setTargetAtTime(vol*0.95,now,0.8);FOLEY.subOsc.frequency.setValueAtTime(36,now);
+  FOLEY.subGain.gain.setTargetAtTime(vol*0.5,now,0.8);
+ }
+}
 
 /* ---------- MINIMALIST SURVIVAL-HORROR THEME MUSIC (Santaolalla / Akira Yamaoka Style) ---------- */
 const MUSIC={level:-1,step:0,dronePads:[],timer:null,nextPluckT:0};
@@ -132,6 +186,7 @@ function startMusicForLevel(level){
   p.o.frequency.setTargetAtTime(root*p.ratio,AC.currentTime,0.8);
   p.g.gain.setTargetAtTime(state==='play'?p.maxGain*S.volume:0.0001,AC.currentTime,0.6);
  }
+ updateFoleyForLevel(MUSIC.level);
 }
 /* ---------- input ---------- */
 const keys={},hit={},mouse={x:0,y:0,down:false,click:false};
