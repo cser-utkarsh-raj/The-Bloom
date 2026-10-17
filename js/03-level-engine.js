@@ -135,7 +135,11 @@ class Level{
   }
   Z=Math.max(.55,Math.min(1.6,Math.min(W/1280,H/720)))*S.zoom*(1 + camBonus);EDGE=S.gfx!=='low';
   shk*=.86;if(shk<.2)shk=0;const sx=(Math.random()-.5)*shk*2,sy=(Math.random()-.5)*shk*2;CX=camX+sx+camOffX;CY=camY+sy+camOffY;
-  setScreen();cx.fillStyle='#05090b';cx.fillRect(0,0,W,H);
+  if(typeof window.BloomWorldEnhancements!=='undefined'){
+    BloomWorldEnhancements.renderPerimeterBuffer(cx,this,CX,CY,Z,W,H);
+  }else{
+    setScreen();cx.fillStyle='#05090b';cx.fillRect(0,0,W,H);
+  }
   setWorld();LIGHTS.length=0;
   const hw=W/2/Z+110,hh=H/2/Z+170,p=this.player,pk=p.x+p.y;
   const pad = 16;
@@ -150,7 +154,8 @@ class Level{
       if(Math.abs(x - CX) > hw || Math.abs(y - CY) > hh) continue;
       const inI = inJ && i >= 0 && i < this.w;
       if(inI){
-        const t = TEX[row[i]];
+        const tileName = this.getEnhancedTileType ? this.getEnhancedTileType(i, j, row[i]) : row[i];
+        const t = (typeof TEX !== 'undefined' && TEX[tileName]) ? TEX[tileName] : TEX[row[i]];
         if(t) cx.drawImage(t[(i + j) & 1], x - 33, y - 17);
       } else if(extTex){
         // Exterior apron beyond playable boundaries: seamless terrain
@@ -178,6 +183,9 @@ class Level{
     cx.strokeStyle='rgba(25,50,38,.45)';cx.lineWidth=1.2;for(let k=0;k<6;k++){const a=k*1.05+d.x;cx.beginPath();cx.moveTo(isx(d.x,d.y),isy(d.x,d.y));cx.lineTo(isx(d.x+Math.cos(a)*d.r*.7,d.y+Math.sin(a)*d.r*.7),isy(d.x+Math.cos(a)*d.r*.7,d.y+Math.sin(a)*d.r*.7));cx.stroke();}
     light(d.x,d.y,.2,d.r*1.1,.25,'#1f8a5d');}
   }
+  if(typeof window.BloomWorldEnhancements!=='undefined'){
+   BloomWorldEnhancements.renderDecals(cx,this,CX,CY,Z);
+  }
   if(this.goal){const g=this.goal,pu=.5+.5*Math.sin(this.t*3);groundEll(g.x,g.y,g.r,rgba(THEMES[S.theme].acc,.1+.1*pu),THEMES[S.theme].acc,.8,3);const sx0=isx(g.x,g.y),sy0=isy(g.x,g.y);const gr=cx.createLinearGradient(0,sy0-260,0,sy0);gr.addColorStop(0,'rgba(120,255,190,0)');gr.addColorStop(1,'rgba(120,255,190,.28)');cx.fillStyle=gr;cx.fillRect(sx0-18,sy0-260,36,260);light(g.x,g.y,.5,g.r*1.6,.7,THEMES[S.theme].acc);}
   for(const t of this.tele){const k=t.age/t.max;
    if(t.t==='ring')groundEll(t.x,t.y,t.r*k,rgba('#ff3a5a',.12),'#ff6a8a',.85,3);
@@ -191,6 +199,10 @@ class Level{
   if(!this.daughter.carried)items.push({k:this.daughter.x+this.daughter.y,t:4,o:this.daughter});
   items.push({k:p.x+p.y,t:5,o:p});
   for(const g of this.ghosts)items.push({k:g.x+g.y,t:6,o:g});
+  if(typeof window.BloomWorldEnhancements!=='undefined'){
+   const propQueue=BloomWorldEnhancements.getDepthSortedPropQueue(this,CX,CY,Z,W,H);
+   for(const pq of propQueue){items.push({k:pq.k,t:99,draw:pq.draw});}
+  }
   items.sort((a,b)=>a.k-b.k);
   for(const it of items){const o=it.o;
    if(it.t===0){const d=PD[o.k];let occ=false;if(o.tall&&Math.min(o.w,o.d)>.62&&it.k>pk+.2&&Math.abs(o.cx-p.x)<2.3&&Math.abs(o.cy-p.y)<2.3)occ=true;
@@ -201,6 +213,7 @@ class Level{
    else if(it.t===3)drawEnemy(o);
    else if(it.t===4)drawNancy(o);
    else if(it.t===5)drawDavid(o,this);
+   else if(it.t===99)it.draw(cx);
    else{cx.globalAlpha=.3+.2*Math.sin(this.t*10);human(o.x,o.y,{f:Math.atan2(p.y-o.y,p.x-o.x),sh:'#2a3a3a',pn:'#1a2626',sk:'#6a8a8a',hr:'#101818',arms:'fwd',glow:'#ff3030',ph:0});cx.globalAlpha=1;}}
   for(const q of this.parts){const k=q.life/q.max;cx.globalAlpha=Math.min(1,k*1.4);cx.fillStyle=q.col;cx.beginPath();cx.arc(isx(q.x,q.y),isy(q.x,q.y,q.z),q.r*(.4+k*.6),0,6.2832);cx.fill();}cx.globalAlpha=1;
   cx.font='bold 15px "Share Tech Mono",monospace';cx.textAlign='center';
