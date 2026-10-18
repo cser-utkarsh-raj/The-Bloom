@@ -36,8 +36,9 @@ function frame(now){
  // Keep the boot shield over the canvas until the actual menu image has been drawn.
  // This prevents the procedural fallback/old canvas state flashing during asset loading.
  if(!bootShieldReleased){
+  const isMob=Boolean(window.IS_MOBILE||(typeof innerWidth!=='undefined'&&innerWidth<=820&&('ontouchstart' in window||navigator.maxTouchPoints>0)));
   const menuImage=typeof getSceneImg==='function'?getSceneImg('menu'):null;
-  if((menuImage&&(menuImage.loaded||menuImage.failed))||now-bootStarted>5000){
+  if(isMob||(menuImage&&(menuImage.loaded||menuImage.failed))||now-bootStarted>400){
    bootShieldReleased=true;const shield=$('boot-shield');if(shield)shield.classList.add('boot-ready');
   }
  }
@@ -46,8 +47,9 @@ function frame(now){
 function boot(){
  resize();makeTextures();makeGrain();applyTheme();
  if(typeof window.BloomMegaUI!=='undefined'){
+  const isMob=Boolean(window.IS_MOBILE||(typeof innerWidth!=='undefined'&&innerWidth<=820&&('ontouchstart' in window||navigator.maxTouchPoints>0)));
   BloomMegaUI.init({
-   quality:(typeof S!=='undefined'&&S.gfx)||'high',
+   quality:isMob?'medium':((typeof S!=='undefined'&&S.gfx)||'high'),
    reducedMotion:!!(typeof S!=='undefined'&&S.reducedMotion)
   });
  }

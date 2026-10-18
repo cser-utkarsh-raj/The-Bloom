@@ -15,7 +15,10 @@
    ============================================================ */
 (function(){
  if(typeof keys==='undefined'||typeof cv==='undefined'||typeof TOUCH==='undefined')return;
- const isTouch=('ontouchstart' in window||navigator.maxTouchPoints>0)&&window.matchMedia&&matchMedia('(pointer: coarse)').matches;
+ const isTouch=('ontouchstart' in window||navigator.maxTouchPoints>0)||
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)||
+  (window.matchMedia&&matchMedia('(pointer: coarse)').matches);
+ window.IS_MOBILE=isTouch;
  if(!isTouch)return;
  document.body.classList.add('mobile');
 

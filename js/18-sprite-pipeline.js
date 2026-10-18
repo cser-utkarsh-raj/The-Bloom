@@ -857,6 +857,193 @@
     return origDrawEnemy.call(this, e);
   };
 
+  // --- LEVEL 4 NPCS: PATROL OFFICER & HUDDLED SURVIVORS ---
+  window.drawKinematicNPC = function (n) {
+    if (!n) return;
+    haloRing(n.x, n.y, '#3aff70');
+
+    if (n.kind === 'cop') {
+      const sc = 1.35;
+      const f = n.f || 1;
+      const isShooting = n.fx > 0;
+      const recoil = isShooting ? 0.08 : 0;
+
+      // 3D Kinematic Humanoid Rig
+      const rig = drawKinematicIsoHumanoid({
+        x: n.x - Math.cos(f) * recoil,
+        y: n.y - Math.sin(f) * recoil,
+        f: f,
+        ph: 0,
+        still: true
+      }, {
+        scale: sc,
+        pantsCol: '#182436',
+        shoeCol: '#0a0d12',
+        jacketCol: '#213a5e',
+        lapelCol: '#162842',
+        shirtCol: '#86a0be',
+        skinCol: '#d9a47c',
+        hairCol: '#161311',
+        beltCol: '#0e0e0e',
+        shadowAlpha: 0.44
+      });
+
+      const sf = sc;
+      const handR = rig.handR;
+      const handL = rig.handL;
+      const head = rig.head;
+
+      // Police Visor Cap
+      cx.save();
+      const capX = head[0];
+      const capY = head[1] - 4 * sf;
+      cx.fillStyle = '#1c2e47';
+      cx.beginPath();
+      cx.ellipse(capX, capY, 7 * sf, 3.8 * sf, 0, 0, Math.PI * 2);
+      cx.fill();
+
+      // Cap visor peak
+      const fx = Math.cos(f), fy = Math.sin(f);
+      const isFacingCam = (fx + fy) > -0.2;
+      if (isFacingCam) {
+        cx.fillStyle = '#0a0c0f';
+        cx.beginPath();
+        cx.ellipse(capX + (fx - fy) * 3 * sf, capY + (fx + fy) * 1.5 * sf + 2, 5.5 * sf, 2.2 * sf, 0, 0, Math.PI * 2);
+        cx.fill();
+        // Golden police shield badge on cap
+        cx.fillStyle = '#d4af37';
+        cx.beginPath();
+        cx.arc(capX, capY - 1 * sf, 1.8 * sf, 0, Math.PI * 2);
+        cx.fill();
+      }
+
+      // Tactical 12-Gauge Pump Shotgun held across chest/pointed at heading
+      const gunStartX = handL[0] * 0.4 + handR[0] * 0.6;
+      const gunStartY = handL[1] * 0.4 + handR[1] * 0.6;
+      const aimDirX = isx(Math.cos(f), Math.sin(f));
+      const aimDirY = isy(Math.cos(f), Math.sin(f), 0);
+      const aimLen = Math.hypot(aimDirX, aimDirY) || 1;
+      const uX = aimDirX / aimLen;
+      const uY = aimDirY / aimLen;
+
+      const barrelLen = (isShooting ? 22 : 25) * sf;
+      const muzzleX = gunStartX + uX * barrelLen;
+      const muzzleY = gunStartY + uY * barrelLen - 2;
+
+      // Wooden/Polymer Stock
+      cx.strokeStyle = '#3d2516';
+      cx.lineWidth = 3.6 * sf;
+      cx.lineCap = 'round';
+      cx.beginPath();
+      cx.moveTo(gunStartX - uX * 7 * sf, gunStartY - uY * 7 * sf + 1);
+      cx.lineTo(gunStartX, gunStartY);
+      cx.stroke();
+
+      // Gun Barrel & Magazine Tube
+      cx.strokeStyle = '#1b1f24';
+      cx.lineWidth = 2.4 * sf;
+      cx.beginPath();
+      cx.moveTo(gunStartX, gunStartY);
+      cx.lineTo(muzzleX, muzzleY);
+      cx.stroke();
+
+      // Gun Fore-end pump grip
+      cx.strokeStyle = '#4a2f1c';
+      cx.lineWidth = 3.2 * sf;
+      cx.beginPath();
+      cx.moveTo(gunStartX + uX * 6 * sf, gunStartY + uY * 6 * sf - 1);
+      cx.lineTo(gunStartX + uX * 13 * sf, gunStartY + uY * 13 * sf - 1);
+      cx.stroke();
+      cx.restore();
+
+      // Dynamic Shotgun Muzzle Flash & Tracer Fire
+      if (isShooting) {
+        cx.save();
+        // Core white/gold blast
+        glowDot(n.x + Math.cos(f) * 0.55, n.y + Math.sin(f) * 0.55, 0.95, 14, '#ffffff', 0.95);
+        glowDot(n.x + Math.cos(f) * 0.62, n.y + Math.sin(f) * 0.62, 0.95, 24, '#ffe070', 0.85);
+
+        // Illuminating light cone on floor
+        light(n.x, n.y, 1.2, 5.0, 1.0, '#ffe070');
+
+        // Pellet spread tracer lines to target
+        const tx = n.tx, ty = n.ty;
+        cx.lineWidth = 2.5;
+        cx.strokeStyle = 'rgba(255, 235, 170, 0.9)';
+        cx.beginPath();
+        cx.moveTo(muzzleX, muzzleY);
+        cx.lineTo(isx(tx, ty), isy(tx, ty, 0.8));
+        cx.stroke();
+
+        // Secondary spread lines
+        cx.lineWidth = 1.2;
+        cx.strokeStyle = 'rgba(255, 190, 80, 0.65)';
+        for (let i = -1; i <= 1; i += 2) {
+          cx.beginPath();
+          cx.moveTo(muzzleX, muzzleY);
+          cx.lineTo(isx(tx, ty) + i * 8, isy(tx, ty, 0.8) + i * 5);
+          cx.stroke();
+        }
+
+        // Flying brass shotgun shell casing
+        const shellA = f + Math.PI * 0.5;
+        const shellX = gunStartX + Math.cos(shellA) * 8;
+        const shellY = gunStartY + Math.sin(shellA) * 5 - 3;
+        cx.fillStyle = '#ffd700';
+        cx.fillRect(shellX, shellY, 3, 1.8);
+        cx.restore();
+      }
+      return;
+    }
+
+    if (n.kind === 'surv') {
+      // Huddled Civilian Survivors
+      const sc = 1.15;
+      const t = typeof window.T === 'number' ? window.T : 0;
+      const shiver = Math.sin(t * 14 + (n.x * 3)) * 0.015;
+      const breath = Math.sin(t * 2.2 + (n.y * 2)) * 0.012;
+
+      drawKinematicIsoHumanoid({
+        x: n.x + shiver,
+        y: n.y,
+        f: n.f || 2,
+        ph: 0,
+        still: true
+      }, {
+        scale: sc,
+        pantsCol: '#20222b',
+        shoeCol: '#111216',
+        jacketCol: n.c || '#6b4238',
+        lapelCol: '#4a2f27',
+        shirtCol: '#9ca3af',
+        skinCol: '#e0b890',
+        hairCol: '#251b14',
+        shadowAlpha: 0.38
+      });
+
+      // Civilian knit winter beanie / scarf
+      cx.save();
+      const sx = isx(n.x, n.y);
+      const sy = isy(n.x, n.y, (1.18 + breath) * sc);
+      cx.fillStyle = n.c || '#5c3a32';
+      cx.beginPath();
+      cx.ellipse(sx, sy, 7.5 * sc, 4.5 * sc, 0, 0, Math.PI * 2);
+      cx.fill();
+      // Beanie pom-pom
+      cx.fillStyle = '#ffffff';
+      cx.beginPath();
+      cx.arc(sx, sy - 3.5 * sc, 1.8 * sc, 0, Math.PI * 2);
+      cx.fill();
+      cx.restore();
+      return;
+    }
+
+    if (typeof origDrawNPC === 'function') origDrawNPC(n);
+  };
+
+  const origDrawNPC = window.drawNPC;
+  window.drawNPC = window.drawKinematicNPC;
+
   // =========================================================================
   // 3. UNIFIED ISOMETRIC SURVIVAL HORROR VEHICLES & PROPS
   // =========================================================================

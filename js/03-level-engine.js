@@ -172,7 +172,14 @@ class Level{
    camOffX = ctf.offsetX || 0;
    camOffY = ctf.offsetY || 0;
   }
-  Z=Math.max(.55,Math.min(1.6,Math.min(W/1280,H/720)))*S.zoom*(1 + camBonus);EDGE=S.gfx!=='low';
+  const isMob = Boolean(window.IS_MOBILE || (typeof W !== 'undefined' && W <= 820 && ('ontouchstart' in window || navigator.maxTouchPoints > 0)));
+  let baseScale = Math.min(W / 1280, H / 720);
+  if (isMob) {
+    const minDim = Math.min(W, H);
+    baseScale = Math.max(1.15, Math.min(1.48, 560 / (minDim || 390)));
+  }
+  Z = Math.max(isMob ? 1.15 : .55, Math.min(1.65, baseScale)) * S.zoom * (1 + camBonus);
+  EDGE = S.gfx !== 'low';
   shk*=.86;if(shk<.2)shk=0;const sx=(Math.random()-.5)*shk*2,sy=(Math.random()-.5)*shk*2;CX=camX+sx+camOffX;CY=camY+sy+camOffY;
   if(typeof window.BloomWorldEnhancements!=='undefined'){
     BloomWorldEnhancements.renderPerimeterBuffer(cx,this,CX,CY,Z,W,H);

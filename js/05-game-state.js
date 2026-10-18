@@ -25,9 +25,9 @@ function toggleHelp(){helpShown=helpShown>0?0:99;$('help').style.opacity=helpSho
 function hud(lv){
  const p=lv.player,d=lv.daughter,f=G.hp/G.maxHp;
  setW('bA',f*100);$('bA').style.background=f>.6?'#4dffa0':f>.3?'#ffd34d':'#ff4a4a';setW('bS',p.stam);setW('bN',d.hp/d.max*100);setW('bI',G.infect);
- setT('tr','TRUST '+Math.round(d.trust));setT('med','✚ ×'+G.meds+'  [Q]');setT('score',G.score);setT('obj',lv.objText());
+ setT('tr','TRUST '+Math.round(d.trust));setT('med','✚ ×'+G.meds+(window.IS_MOBILE?'':'  [Q]'));setT('score',G.score);setT('obj',lv.objText());
  const b=lv.boss;$('boss').style.display=b&&b.awake&&!b.dead?'block':'none';if(b&&b.awake){setT('bn','MAYA — THE BLOOM-WIFE');setW('bB',Math.max(0,b.hp/b.max*100));}
- let pr='';if(lv.hint)pr=lv.hint;else if(p.carry)pr='[E] Put Nancy down';else if(!d.carried&&dst(p.x,p.y,d.x,d.y)<2.6)pr='[E] Carry Nancy';setT('prompt',pr);
+ let pr='';if(lv.hint)pr=lv.hint;else if(p.carry)pr=window.IS_MOBILE?'[CARRY] Put Nancy down':'[E] Put Nancy down';else if(!d.carried&&dst(p.x,p.y,d.x,d.y)<2.6)pr=window.IS_MOBILE?'[CARRY] Carry Nancy':'[E] Carry Nancy';setT('prompt',pr);
  $('hurt').style.boxShadow=G.hp<30?`inset 0 0 ${80+30*Math.sin(lv.t*5)}px rgba(160,0,0,.6)`:'none';
 }
 function portraits(){
@@ -44,6 +44,7 @@ const INTRO=[
  {t:'No Safe Haven',scene:'school',txt:'St. Jude’s High School was meant to be a civilian intake station. The courtyard is breached, the doors are buckling, and exhausted survivors are trapped inside. A patrol officer levels his shotgun beside David. Beyond the doors, the infected press forward in a single, heaving mass. This shelter will not hold forever.',tip:'Hold the barricaded doors for 60 seconds. Create space before bloated hosts rupture.'},
  {t:'The Point Of No Return',scene:'bunker',txt:'Operation Scorched Shore begins at dawn. The military will burn the coastline to contain the outbreak, whether anyone is still alive there or not. Bunker 7 lies beyond the quarantine barricades, through a highway of ash and artillery. Nancy’s hand is small in David’s grip. He cannot stop now — and he cannot go back.',tip:'Break through the quarantine checkpoints before the countdown expires. Reach Bunker 7 with Nancy.'}];
 function startLevel(i){
+ if(!G)G=newGame();
  G.level=i;const D=DIFFS[S.difficulty];
  G.hp=Math.min(G.maxHp,G.hp+(i>0?25:0));if(i===0&&!G.snap){G.hp=G.maxHp;}
  G.snap={hp:G.hp,meds:G.meds,infect:G.infect,score:G.score,honour:(G.honour!==undefined?G.honour:100),trust:G.trust,kills:0,maxCombo:G.maxCombo||0};G.kills=0;

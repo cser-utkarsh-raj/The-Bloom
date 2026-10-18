@@ -17,7 +17,7 @@ function getSeed(){if(GLOBAL_SEED!==null)return GLOBAL_SEED;const urlParams=new 
 const cv=$('c'),cx=cv.getContext('2d');
 const lc=document.createElement('canvas'),lx=lc.getContext('2d');
 let W=innerWidth,H=innerHeight,DPR=1,Z=1;
-function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';lc.width=Math.max(2,W>>1);lc.height=Math.max(2,H>>1);const oc=$('oc');oc.width=W;oc.height=H;}addEventListener('resize',resize);
+function resize(){const isMob=Boolean(window.IS_MOBILE||(typeof innerWidth!=='undefined'&&innerWidth<=820&&('ontouchstart' in window||navigator.maxTouchPoints>0)));DPR=Math.min(isMob?1.35:2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';lc.width=Math.max(2,W>>1);lc.height=Math.max(2,H>>1);const oc=$('oc');oc.width=W;oc.height=H;}addEventListener('resize',resize);
 
 /* ---------- settings ---------- */
 const DEF={difficulty:'survivor',theme:'bloom',gfx:'high',bright:'normal',zoom:1,particles:true,shake:true,grain:true,lighting:true,weather:true,minimap:true,subs:true,assist:true,bars:true,volume:.6,accessibility:false,reducedMotion:false};
