@@ -1012,6 +1012,96 @@
 
       '  border-color: #b5c49e;',
 
+      '}',
+
+      'body.mobile #hl {',
+
+      '  left: 8px !important;',
+
+      '  top: 8px !important;',
+
+      '  gap: 3px !important;',
+
+      '  padding: 3px 5px !important;',
+
+      '  max-width: 138px !important;',
+
+      '  background: rgba(8, 12, 10, 0.85) !important;',
+
+      '  border-radius: 3px !important;',
+
+      '}',
+
+      'body.mobile #hl::before {',
+
+      '  content: "VITAL STATUS" !important;',
+
+      '  font-size: 7px !important;',
+
+      '  letter-spacing: 1px !important;',
+
+      '  padding: 1px 3px 2px !important;',
+
+      '  margin-bottom: 2px !important;',
+
+      '  line-height: 1 !important;',
+
+      '}',
+
+      'body.mobile .pc {',
+
+      '  padding: 2px 5px 2px 3px !important;',
+
+      '  gap: 5px !important;',
+
+      '}',
+
+      'body.mobile .pc canvas {',
+
+      '  width: 24px !important;',
+
+      '  height: 24px !important;',
+
+      '  flex-shrink: 0 !important;',
+
+      '}',
+
+      'body.mobile .nm {',
+
+      '  font-size: 7.5px !important;',
+
+      '  letter-spacing: 1px !important;',
+
+      '  line-height: 1 !important;',
+
+      '}',
+
+      'body.mobile .bar {',
+
+      '  width: 78px !important;',
+
+      '  height: 6px !important;',
+
+      '  margin-top: 2px !important;',
+
+      '}',
+
+      'body.mobile .bar.s {',
+
+      '  width: 78px !important;',
+
+      '  height: 3px !important;',
+
+      '  margin-top: 1px !important;',
+
+      '}',
+
+      'body.mobile .bloom-ecg-strip {',
+
+      '  width: 78px !important;',
+
+      '  height: 10px !important;',
+
       '}'
 
     ].join('\n');
